@@ -38,8 +38,8 @@ def take_snapshot(channel_number):
 
 
 class MainWindow(QMainWindow):  # inherits from QMainWindow
-    def __init__(self):   # constructor
-        super().__init__()   # calls parent init to ensure proper initialization
+    def __init__(self):  # constructor
+        super().__init__()  # calls parent init to ensure proper initialization
         self.setWindowTitle("BIOSIGNAL")
         self.setGeometry(0, 0, 1860, 950)
         self.setWindowIcon(QIcon("images/app icon.png"))
@@ -116,16 +116,64 @@ class MainWindow(QMainWindow):  # inherits from QMainWindow
         signal_one_button.setGeometry(100, 200, 200, 50)
         signal_one_button.clicked.connect(self.update_label)
 
+        button = QPushButton("click meee ", self)
+        button.setGeometry(200, 250, 200, 100)
+        button.setStyleSheet("font-size: 30px;")
+        button.clicked.connect(self.on_click)
+
     def update_label(self):
         signal_one_name = self.signal_one_label.text()
         print(f"Clicked {signal_one_name}")
 
+    # def on_click(self):
+    #     print("button clicked")
+    #     print(self.open_file())
 
+    # def open_file(self):
+    #     filename = QFileDialog.getOpenFileName()
+    #     path = filename[0]
+    #     print(path)
+    #
+    #     x_data = []
+    #     y_data = []
+    #
+    #     file = open(path, "r")
+    #     read = file.readlines()
+    #
+    #     for line in read:
+    #         line = line.strip()
+    #         print(line)
+    #         if line:
+    #             x, y = line.split(',')
+    #             x_data.append(float(x))
+    #             y_data.append(float(y))
+    #
+    #     print ("x data:", x_data)
+    #     print("y data:", y_data)
+    #     return x_data, y_data
+
+    def on_click(self):
+        print("Button clicked")
+        x_data, y_data = self.open_file()
+        if x_data is not None and y_data is not None:
+            print("x data:", x_data)
+            print("y data:", y_data)
+
+    def open_file(self):
+        filename = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
+        path = filename[0]
+
+        if path:
+            data = pd.read_csv(path)
+            x = data.iloc[:, 0].values
+            y = data.iloc[:, 1].values
+            return x, y
+        else:
+            print("No file selected")
+            return None, None
 
     def import_signal(self):
         pass
-
-
 
 
 def main():
