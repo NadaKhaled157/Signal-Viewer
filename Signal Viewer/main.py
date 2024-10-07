@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt  # alignment
-
+import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 import pyautogui
@@ -125,33 +126,6 @@ class MainWindow(QMainWindow):  # inherits from QMainWindow
         signal_one_name = self.signal_one_label.text()
         print(f"Clicked {signal_one_name}")
 
-    # def on_click(self):
-    #     print("button clicked")
-    #     print(self.open_file())
-
-    # def open_file(self):
-    #     filename = QFileDialog.getOpenFileName()
-    #     path = filename[0]
-    #     print(path)
-    #
-    #     x_data = []
-    #     y_data = []
-    #
-    #     file = open(path, "r")
-    #     read = file.readlines()
-    #
-    #     for line in read:
-    #         line = line.strip()
-    #         print(line)
-    #         if line:
-    #             x, y = line.split(',')
-    #             x_data.append(float(x))
-    #             y_data.append(float(y))
-    #
-    #     print ("x data:", x_data)
-    #     print("y data:", y_data)
-    #     return x_data, y_data
-
     def on_click(self):
         print("Button clicked")
         x_data, y_data = self.open_file()
@@ -185,3 +159,34 @@ def main():
 
 if __name__ == "__main__":  # script is being run directly not imported
     main()
+
+
+
+
+# leave this here just in case
+    # def on_click(self):
+    #     print("button clicked")
+    #     print(self.open_file())
+
+    # def open_file(self):
+    #     filename = QFileDialog.getOpenFileName()
+    #     path = filename[0]
+    #     print(path)
+    #
+    #     x_data = []
+    #     y_data = []
+    #
+    #     file = open(path, "r")
+    #     read = file.readlines()
+    #
+    #     for line in read:
+    #         line = line.strip()
+    #         print(line)
+    #         if line:
+    #             x, y = line.split(',')
+    #             x_data.append(float(x))
+    #             y_data.append(float(y))
+    #
+    #     print ("x data:", x_data)
+    #     print("y data:", y_data)
+    #     return x_data, y_data
