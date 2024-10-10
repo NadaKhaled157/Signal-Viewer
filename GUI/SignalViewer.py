@@ -13,9 +13,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1379, 870)
-        MainWindow.setMinimumSize(QtCore.QSize(1256, 870))
+        MainWindow.setObjectName("Signal Viewer")
+        MainWindow.setFixedSize(1379, 870)
         MainWindow.setMouseTracking(False)
         MainWindow.setStyleSheet("\n"
 "background-color: rgb(42, 42, 42);")
