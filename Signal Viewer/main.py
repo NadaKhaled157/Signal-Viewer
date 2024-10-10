@@ -1,137 +1,161 @@
-import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog
-from PyQt5.QtGui import QIcon, QFont, QPixmap
-from PyQt5.QtCore import Qt  # alignment
+import random
+import pyqtgraph as pg
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QBrush
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog, QVBoxLayout, QSlider, QCheckBox
 import pandas as pd
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-import pyautogui
-import pyscreenshot as ImageGrab
-from PIL import Image
+import sys
+import numpy as np
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 
-screen_width, screen_height = pyautogui.size()
+class SignalObject:
+    def __init__(self, x_data, y_data, plot_widget, color, signalNumber, signalId):
+        self.x = x_data
+        self.y = y_data
+        self.signalId = signalId
+        self.color = color
+        self.signalNumber = signalNumber
+        self.plot_widget = plot_widget
+        self.index = 0
+        self.time = []
+        self.magnitude = []
+        self.showSignal = True
+
+        # line will be plotted
+        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name=f"signal{str(self.signalNumber)}")
+
+    def update(self):
+        if self.index < len(self.x):
+            self.time.append(self.x[self.index])
+            self.magnitude.append(self.y[self.index])
+            self.index += 1
+            if self.showSignal:
+                self.line.setData(self.time, self.magnitude)
+                if len(self.time) > 400:
+                    self.plot_widget.setXRange(self.time[-400], self.time[-1])
+                else:
+                    self.plot_widget.setXRange(self.x[0], self.x[399])
+            else:
+                self.plot_widget.setXRange(self.x[0], self.x[399]) # this to make the graph as the first appearance
 
 
-def take_snapshot(channel_number):
-    if channel_number == 1:
-        bbox = (380, 160, 1500, 535)
-        # signal_name = signal_one_name
-    elif channel_number == 2:
-        bbox = (380, 500, 1500, 1060)
-        # signal_name = signal_two_name
-    else:
-        bbox = (380, 160, 1500, 1070)
 
-    # snapshot = pyautogui.screenshot()
-    # snapshot_path = "Snapshots/snapshot.png"
-    # snapshot.save(snapshot_path)
+            # scroll if more than 400 points are plotted
+            # if len(self.time) > 400:
+            #     self.plot_widget.setXRange(self.time[-400], self.time[-1])
+            # else:
+            #     self.plot_widget.setXRange(self.x[0], self.x[399])
+    def signalStatistics(self):
+        pass
 
-    snapshot = ImageGrab.grab(bbox=bbox)
-    snapshot.show()
-    snapshot_path = "Snapshots/snapshot.png"
-    snapshot.save(snapshot_path)
-    pdf = canvas.Canvas("Reports/example.pdf", pagesize=A4)
-    pdf.setTitle("Sample PDF")
-    # pdf.drawString(200, 800, "Hello, user!")
-    pdf.drawImage(snapshot_path, 70, 500, 350, 150)
-    pdf.save()
+class SignalCine(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        # signals
+        self.signalsChannel1 = []  # list of object"signal"
+        self.signalsChannel2 = []
+        self.used_color = set() # to track the colored appeared
+        self.signalId = 0
+        main_widget = QWidget(self)
+        self.setCentralWidget(main_widget)
+        self.main_layout = QVBoxLayout(main_widget)
+
+        # upload
+        uploadSignalButton = QPushButton("Upload Signal", self)
+        uploadSignalButton.setStyleSheet("font-size: 30px;")
+        uploadSignalButton.clicked.connect(self.uploadSignal)
+        self.main_layout.addWidget(uploadSignalButton)
+
+        # the check boxes
+        self.checkbox_layout = QVBoxLayout()
+        self.main_layout.addLayout(self.checkbox_layout)
+        # self.channel_1_Selected = QCheckBox("ch1")
+        # self.channel_2_Selected = QCheckBox("ch2")
+        # main_layout.addWidget(self.channel_1_Selected)
+        # main_layout.addWidget(self.channel_2_Selected)
+        # self.channel_1_Selected.setChecked(True)
+        # self.channel_1_Selected.stateChanged.connect(self.selectChannel1StateChanged)
+        # self.channel_2_Selected.stateChanged.connect(self.selectChannel2StateChanged)
+
+        # the first graph
+        self.plot_graph = pg.PlotWidget()
+        legend = self.plot_graph.addLegend(offset=(-30, 0.5))
+        legend.setBrush(QBrush(QColor(128, 128, 128, 70)))
+        self.plot_graph.showGrid(x=True, y=True)
+        self.main_layout.addWidget(self.plot_graph)
+
+        # control buttons
+        playSignalButton = QPushButton("Play", self)
+        playSignalButton.setStyleSheet("font-size: 30px;")
+        playSignalButton.clicked.connect(self.playSignal)
+        self.main_layout.addWidget(playSignalButton)
+
+        pauseSignalButton = QPushButton("Pause", self)
+        pauseSignalButton.setStyleSheet("font-size: 30px;")
+        pauseSignalButton.clicked.connect(self.pauseSignal)
+        self.main_layout.addWidget(pauseSignalButton)
+
+        rewindSignalButton = QPushButton("Rewind", self)
+        rewindSignalButton.setStyleSheet("font-size: 30px;")
+        rewindSignalButton.clicked.connect(self.rewindSignal)
+        self.main_layout.addWidget(rewindSignalButton)
+
+        # the second graph
+        self.plot_graph2 = pg.PlotWidget()
+        legend2 = self.plot_graph2.addLegend(offset=(-30, 0.5))
+        legend2.setBrush(QBrush(QColor(128, 128, 128, 70)))
+        self.plot_graph2.showGrid(x=True, y=True)
+        self.main_layout.addWidget(self.plot_graph2)
+
+        # Timer for updating the plot
+        self.defaultSpeed = 25
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(self.defaultSpeed)
+        self.timer.timeout.connect(self.updateSignals)
+
+        # Slider to control speed
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setMinimum(1)
+        self.slider.setMaximum(50)
+        self.slider.setValue(self.defaultSpeed)
+        self.slider.valueChanged.connect(self.changeSpeed)
+        self.main_layout.addWidget(self.slider)
 
 
-class MainWindow(QMainWindow):  # inherits from QMainWindow
-    def __init__(self):  # constructor
-        super().__init__()  # calls parent init to ensure proper initialization
-        self.setWindowTitle("BIOSIGNAL")
-        self.setGeometry(0, 0, 1860, 950)
-        self.setWindowIcon(QIcon("images/app icon.png"))
-        self.initUI()
 
-    def initUI(self):
-        menu_bar_label = QLabel(self)
-        menu_bar_label.setGeometry(0, 0, 1860, 55)
-        menu_bar_label.setStyleSheet("background-color: #f0f0f0;")
+    def updateSignals(self):
+        for signal in self.signalsChannel1:
+            signal.update()
+        for signal in self.signalsChannel2:
+            signal.update()
 
-        import_button = QPushButton("Imp", self)
-        import_button.setGeometry(5, 2, 50, 50)
-        import_button.setStyleSheet("background-color: #fafafa")
-        import_button.clicked.connect(self.import_signal)
-        # snapshot_button.setIcon(QIcon("import_icon.png"))
-
-        snapshot_button = QPushButton("1", self)
-        snapshot_button.setGeometry(60, 2, 50, 50)
-        snapshot_button.setStyleSheet("background-color: #fafafa")
-        snapshot_button.clicked.connect(lambda: take_snapshot(1))
-        # snapshot_button.setIcon(QIcon("snapshot_icon.png"))
-
-        # link_channels_button = QPushButton("Link Channels ", self)
-        # link_channels_button.setFont(QFont("Garet", 8))
-        # link_channels_button.setGeometry(115, 2, 200, 50)
-        # link_channels_button.setStyleSheet("background-color: #fafafa")
-        # link_channels_button.setStyleSheet("color:#3f446f;"
-        #                                   "background-color:white;"
-        #                                   "font-weight:bold;")
-        # link_channels_button.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        # label.setAlignment(Qt.AlignLeft)
-        # label.setAlignment(Qt.AlignVCenter)  # vertical alignment (default)
-        # label.setAlignment(Qt.AlignCenter)  # center vertically & horizontally
-
-        snapshot_two_button = QPushButton("2", self)
-        snapshot_two_button.setGeometry(320, 2, 50, 50)
-        snapshot_two_button.setStyleSheet("background-color: #fafafa")
-        snapshot_two_button.clicked.connect(lambda: take_snapshot(2))
-        # snapshot_button.setIcon(QIcon("snapshot_icon.png"))
-
-        left_section_label = QLabel(self)
-        left_section_label.setGeometry(15, 70, 300, 850)
-        left_section_label.setStyleSheet("background-color: #fafafa;")
-
-        middle_section_label = QLabel(self)
-        middle_section_label.setGeometry(330, 70, 1200, 850)
-        middle_section_label.setStyleSheet("background-color: #fafafa;")
-
-        right_section_label = QLabel(self)
-        right_section_label.setGeometry(1545, 70, 300, 850)
-        right_section_label.setStyleSheet("background-color: #fafafa;")
-
-        channel_one_label = QLabel(self)
-        channel_one_label.setGeometry(380, 120, 1100, 350)
-        channel_one_label.setStyleSheet("background-color: #f5f5f5;"
-                                        "border: 2px solid #212434")
-
-        channel_two_label = QLabel(self)
-        channel_two_label.setGeometry(380, 520, 1100, 350)
-        # channel_two_label.setStyleSheet("background-color: #f5f5f5;"
-        #                                 "border: 2px solid #212434")
-        channel_two_label.setStyleSheet("background-color: grey;"
-                                        "border: 2px solid #212434")
-
-        import_icon = QPixmap("import_icon.png")
-        # link_channels_button.setPixmap(import_icon)
-        # link_channels_button.setScaledContents(True)
-
-        self.signal_one_label = QLineEdit(self)
-        self.signal_one_label.setGeometry(100, 100, 200, 40)
-        self.signal_one_label.setStyleSheet("font-size: 20px;"
-                                            "font-family: Garet;")
-        signal_one_button = QPushButton("Update Label", self)
-        signal_one_button.setGeometry(100, 200, 200, 50)
-        signal_one_button.clicked.connect(self.update_label)
-
-        button = QPushButton("click meee ", self)
-        button.setGeometry(200, 250, 200, 100)
-        button.setStyleSheet("font-size: 30px;")
-        button.clicked.connect(self.on_click)
-
-    def update_label(self):
-        signal_one_name = self.signal_one_label.text()
-        print(f"Clicked {signal_one_name}")
-
-    def on_click(self):
+    def uploadSignal(self):
         print("Button clicked")
-        x_data, y_data = self.open_file()
-        if x_data is not None and y_data is not None:
-            print("x data:", x_data)
-            print("y data:", y_data)
+        x, y = self.open_file()
+        if x is not None and y is not None:
+            color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            while color in self.used_color:
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            self.used_color.add(color)
+            self.signalId += 1
+            signal = SignalObject(x, y, self.plot_graph, color, len(self.signalsChannel1)+1, self.signalId)
+            self.signalsChannel1.append(signal)
+            # Dynamically creation of checkboxes
+            channel_1_Selected = QCheckBox(f"signal{self.signalId} ch1")
+            channel_2_Selected = QCheckBox(f"signal{self.signalId} ch2")
+            self.checkbox_layout.addWidget(channel_1_Selected)
+            self.checkbox_layout.addWidget(channel_2_Selected)
+            channel_1_Selected.setChecked(True)
+            channel_1_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id,state))
+            channel_2_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id,state))
+
+            yMin, yMax = min(y), max(y)
+            self.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=x[-1], yMin=yMin, yMax=yMax)
+           # self.rewindSignal()
+            self.timer.start()
+            print("x data:", x)
+            print("y data:", y)
 
     def open_file(self):
         filename = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
@@ -145,48 +169,222 @@ class MainWindow(QMainWindow):  # inherits from QMainWindow
         else:
             print("No file selected")
             return None, None
+    def rewindSignal(self):
+        self.timer.start()
+        for signal in self.signalsChannel1:
+            signal.index = 0
+            signal.time = []
+            signal.magnitude = []
+            signal.line.setData([], [])
+        return
+    def playSignal(self):
+        self.timer.start()
+        return
+    def pauseSignal(self):
+        self.timer.stop()
+        return
+    def changeSpeed(self, value):
+        self.defaultSpeed = 50-value
+        self.timer.setInterval(self.defaultSpeed)
+        print(self.defaultSpeed)
+        return
 
-    def import_signal(self):
-        pass
+    def selectChannel1StateChanged(self, id, state):
+        if state == Qt.Unchecked:  # ch 1 is unchecked
+            for signal in self.signalsChannel1:
+                if signal.signalId == id:
+                    self.plot_graph.removeItem(signal.line)  # remove from ch 1
+                    signal.showSignal = False
+                    break
+        elif state == Qt.Checked:  # ch 1 is checked
+            for signal in self.signalsChannel1:
+                if signal.signalId == id and signal.line not in self.plot_graph.listDataItems():
+                    signal.line.setData(signal.time, signal.magnitude)  # reshow the signal
+                    self.plot_graph.addItem(signal.line)  # readd to the plot
+                    signal.showSignal = True
+                    break
+
+    def selectChannel2StateChanged(self, id, state):
+        signalRelated2Id = None
+        if state == Qt.Checked:  # ch 2 is checked
+            for signal in self.signalsChannel2:
+                if signal.signalId == id and signal.line not in self.plot_graph2.listDataItems(): # then it was existed so we need to reshoe
+                    signal.line.setData(signal.time, signal.magnitude)  # reshow the signal in Plot
+                    signal.showSignal = True
+                    self.plot_graph2.addItem(signal.line)
+                    return
+            for signal in self.signalsChannel1: # here there is no id with that , so we need to create new signal object
+                if signal.signalId == id:
+                    signalRelated2Id = signal
+                    break
+            if signalRelated2Id is not None:
+                signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, self.plot_graph2, signalRelated2Id.color,
+                                      len(self.signalsChannel2) + 1, id)
+                signal.showSignal = True
+                self.signalsChannel2.append(signal)
+                yMin, yMax = min(signalRelated2Id.y), max(signalRelated2Id.y)
+                self.plot_graph2.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin, yMax=yMax)
+                signal.line.setData(signalRelated2Id.time, signalRelated2Id.magnitude)
+                self.plot_graph2.addItem(signal.line)
+        else:  # ch2 2 is unchecked
+            for signal in self.signalsChannel2:
+                if signal.signalId == id:
+                    self.plot_graph2.removeItem(signal.line)  # remove from ch 2
+                    signal.showSignal = False
+                    break
 
 
-def main():
-    app = QApplication(sys.argv)  # create new app object
-    window = MainWindow()  # create new window object
-    window.show()
-    sys.exit(app.exec_())  # app.exec_() waits for user to close window
-
-
-if __name__ == "__main__":  # script is being run directly not imported
-    main()
 
 
 
+# Start the application
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+    main = SignalCine()
+    main.show()
+    sys.exit(app.exec_())
 
-# leave this here just in case
-    # def on_click(self):
-    #     print("button clicked")
-    #     print(self.open_file())
 
-    # def open_file(self):
-    #     filename = QFileDialog.getOpenFileName()
-    #     path = filename[0]
-    #     print(path)
-    #
-    #     x_data = []
-    #     y_data = []
-    #
-    #     file = open(path, "r")
-    #     read = file.readlines()
-    #
-    #     for line in read:
-    #         line = line.strip()
-    #         print(line)
-    #         if line:
-    #             x, y = line.split(',')
-    #             x_data.append(float(x))
-    #             y_data.append(float(y))
-    #
-    #     print ("x data:", x_data)
-    #     print("y data:", y_data)
-    #     return x_data, y_data
+
+#
+# import sys
+# from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+# from PyQt5.QtCore import Qt, QPoint, QRect
+# from PyQt5.QtGui import QPixmap, QPainter, QBrush, QPen, QColor
+#
+#
+# class MyApp(QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.window_width, self.window_height = 1200, 800
+#         self.setMinimumSize(self.window_width, self.window_height)
+#
+#         layout = QVBoxLayout()
+#         self.setLayout(layout)
+#
+#         self.pix = QPixmap(self.rect().size())
+#         self.pix.fill(Qt.white)
+#         # da hena initializes begin w destination to null points
+#         self.begin, self.destination = QPoint(), QPoint()
+#         self.rectangles = []
+#         self.selected_rect = None
+#
+#         self.capture_button = QPushButton("capture", self)
+#         self.capture_button.clicked.connect(self.capture_rectangle)
+#         self.capture_button.hide()
+#
+#         self.delete_button = QPushButton("delete", self)
+#         self.delete_button.clicked.connect(self.delete_rectangle)
+#         self.delete_button.hide()
+#
+#
+#
+#     def paintEvent(self, event):
+#         painter = QPainter(self)
+#         painter.drawPixmap(QPoint(), self.pix)
+#
+#         for i, (rect, color, captured) in enumerate(self.rectangles):
+#             if i == self.selected_rect:
+#                 painter.setPen(QPen(Qt.blue, 2, Qt.DashLine))
+#             else:
+#                 painter.setPen(QPen(color, 2))
+#
+#             painter.setBrush(QBrush(color if captured else QColor(0, 0, 255, 50)))
+#             painter.drawRect(rect.normalized())
+#
+#
+#         if not self.begin.isNull() and not self.destination.isNull():
+#             rect = QRect(self.begin, self.destination)
+#             painter.setPen(QPen(QColor(0, 0, 255), 2))
+#             painter.setBrush(QBrush(QColor(0, 0, 255, 50)))
+#             painter.drawRect(rect.normalized())
+#
+#     def mousePressEvent(self, event):
+#         click_on_rect = False
+#         if event.buttons() & Qt.LeftButton:
+#             clicked_point = event.pos()
+#             for i, (rect, _, _) in enumerate(self.rectangles):
+#                 if rect.contains(clicked_point):
+#                     self.selected_rect = i
+#                     click_on_rect = True
+#                     self.show_buttons(clicked_point)
+#
+#             if not click_on_rect:
+#                 self.begin = event.pos()
+#                 self.destination = self.begin
+#                 self.selected_rect = None
+#                 self.capture_button.hide()
+#                 self.delete_button.hide()
+#
+#             self.update()
+#
+#     def mouseMoveEvent(self, event):
+#         if event.buttons() & Qt.LeftButton and self.begin:
+#             self.destination = event.pos()
+#             self.update()
+#
+#     def mouseReleaseEvent(self, event):
+#         if event.button() & Qt.LeftButton and not self.selected_rect:
+#             rect = QRect(self.begin, self.destination)
+#             print(f'Starting Point: ({self.begin.x()}, {self.begin.y()}), Final Destination: ({self.destination.x()}, {self.destination.y()})')
+#
+#             if rect.width() >10 and rect.height()>10:
+#                 self.rectangles.append((rect, QColor(0, 0, 255), False)) # false ely hwa msh captured lsa w yeb2a blue
+#                 self.selected_rect = len(self.rectangles) - 1
+#                 self.show_buttons(event.pos())
+#
+#
+#             self.begin, self.destination = QPoint(), QPoint()
+#             self.update()
+#
+#     # print(
+#     #     f'Starting Point: ({self.begin.x()}, {self.begin.y()}), Final Destination: ({self.destination.x()}, {self.destination.y()})')
+#     # painter.setPen(QPen(QColor(0, 255, 0), 2))
+#     # painter.setBrush(QBrush(QColor(0, 255, 0, 50)))
+#     # painter.drawRect(rect.normalized())
+#
+#     def show_buttons(self, pos):
+#         self.capture_button.move(pos + QPoint(15, 30))
+#         self.capture_button.show()
+#         self. delete_button.move(pos+ QPoint(130, 30))
+#         self.delete_button.show()
+#
+#
+#     def capture_rectangle(self):
+#         if self.selected_rect is not None:
+#             rect, _, _ = self.rectangles[self.selected_rect]
+#             self.rectangles[self.selected_rect] = (rect, QColor(0, 255, 0, 50), True) # false ely hwa captured
+#             self.capture_button.hide()
+#             self.delete_button.hide()
+#             self.update()
+#
+#     def delete_rectangle(self):
+#         if self.selected_rect is not None:
+#             del self.rectangles[self.selected_rect]
+#             self.capture_button.hide()
+#             self.delete_button.hide()
+#             self.selected_rect = None
+#             self.update()
+#
+#
+# if __name__ == '__main__':
+#
+#
+#     app = QApplication(sys.argv)
+#     app.setStyleSheet('''
+# 		QWidget {
+# 			font-size: 30px;
+# 		}
+# 	''')
+#
+#     myApp = MyApp()
+#     myApp.show()
+#
+#     try:
+#         sys.exit(app.exec_())
+#     except SystemExit:
+#         print('Closing Window...')
+#
+#
+#
+#
