@@ -101,6 +101,16 @@ class SignalCine(QtWidgets.QMainWindow):
         rewindSignalButton.clicked.connect(self.rewindSignal)
         self.main_layout.addWidget(rewindSignalButton)
 
+        zoomInButton = QPushButton("Zoom In", self)
+        zoomInButton.setStyleSheet("font-size: 30px;")
+        zoomInButton.clicked.connect(lambda: self.zoom(zoomIn=True))
+        self.main_layout.addWidget(zoomInButton)
+
+        zoomOutButton = QPushButton("Zoom Out", self)
+        zoomOutButton.setStyleSheet("font-size: 30px;")
+        zoomOutButton.clicked.connect(lambda: self.zoom(zoomIn=False))
+        self.main_layout.addWidget(zoomOutButton)
+
         # the second graph
         self.plot_graph2 = pg.PlotWidget()
         legend2 = self.plot_graph2.addLegend(offset=(-30, 0.5))
@@ -233,6 +243,51 @@ class SignalCine(QtWidgets.QMainWindow):
                     signal.showSignal = False
                     break
 
+    def zoom(self,zoomIn=True):
+        # Get the current view range
+        x_range, y_range = self.plot_graph.viewRange()
+
+        self.min_x_range = 0.1  
+        self.max_x_range = 10   
+        self.min_y_range = 0.1  
+        self.max_y_range = 50   
+
+        
+        x_center = (x_range[0] + x_range[1]) / 2
+        y_center = (y_range[0] + y_range[1]) / 2
+        zoom_factor = 0.8  
+        
+        if zoomIn:
+            new_x_range = [(x_center - (x_center - x_range[0]) * zoom_factor),
+                        (x_center + (x_range[1] - x_center) * zoom_factor)]
+            new_y_range = [(y_center - (y_center - y_range[0]) * zoom_factor),
+                        (y_center + (y_range[1] - y_center) * zoom_factor)]
+        else:
+            new_x_range = [(x_center - (x_center - x_range[0]) / zoom_factor),
+                        (x_center + (x_range[1] - x_center) / zoom_factor)]
+            new_y_range = [(y_center - (y_center - y_range[0]) / zoom_factor),
+                        (y_center + (y_range[1] - y_center) / zoom_factor)]
+
+        new_x_span = new_x_range[1] - new_x_range[0]
+        new_y_span = new_y_range[1] - new_y_range[0]
+
+        # Apply limits to x-axis
+        if new_x_span < self.min_x_range:
+            new_x_range = [x_center - self.min_x_range / 2, x_center + self.min_x_range / 2]
+            
+        elif new_x_span > self.max_x_range:
+            new_x_range = [x_center - self.max_x_range / 2, x_center + self.max_x_range / 2]
+
+        # Apply limits to y-axis
+        if new_y_span < self.min_y_range:
+            new_y_range = [y_center - self.min_y_range / 2, y_center + self.min_y_range / 2]
+            
+        elif new_y_span > self.max_y_range:
+            new_y_range = [y_center - self.max_y_range / 2, y_center + self.max_y_range / 2]
+
+        self.plot_graph.setXRange(new_x_range[0], new_x_range[1], padding=0)
+        self.plot_graph.setYRange(new_y_range[0], new_y_range[1], padding=0)
+        
 
 
 
