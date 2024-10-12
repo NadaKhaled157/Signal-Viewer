@@ -60,7 +60,7 @@ class SignalCine(QtWidgets.QFrame):
 
         # signals
         self.signalsChannel1 = []  # list of object"signal"
-        self.signalsChannel2 = []
+        # self.signalsChannel2 = []
         self.used_color = set()  # to track the colored appeared
         self.signalId = 0
 
@@ -136,15 +136,15 @@ class SignalCine(QtWidgets.QFrame):
             self.signalId += 1
             signal = SignalObject(x, y, self.plot_graph, color, len(self.signalsChannel1)+1, self.signalId)
             self.signalsChannel1.append(signal)
-            # Dynamically creation of checkboxes
-            
-            channel_1_Selected = QCheckBox(f"signal{self.signalId} ch1")
-            channel_2_Selected = QCheckBox(f"signal{self.signalId} ch2")
-            self.checkbox_layout.addWidget(channel_1_Selected)
-            self.checkbox_layout.addWidget(channel_2_Selected)
-            channel_1_Selected.setChecked(True)
-            channel_1_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id,state))
-            channel_2_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id,state))
+
+            # # Dynamically creation of checkboxes
+            # channel_1_Selected = QCheckBox(f"signal{self.signalId} ch1")
+            # channel_2_Selected = QCheckBox(f"signal{self.signalId} ch2")
+            # self.checkbox_layout.addWidget(channel_1_Selected)
+            # self.checkbox_layout.addWidget(channel_2_Selected)
+            # channel_1_Selected.setChecked(True)
+            # channel_1_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id,state))
+            # channel_2_Selected.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id,state))
 
             yMin, yMax = min(y), max(y)
             self.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=x[-1], yMin=yMin, yMax=yMax)
@@ -152,6 +152,7 @@ class SignalCine(QtWidgets.QFrame):
             self.timer.start()
             print("x data:", x)
             print("y data:", y)
+            return signal
 
     def open_file(self):
         filename = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
@@ -203,29 +204,29 @@ class SignalCine(QtWidgets.QFrame):
     def selectChannel2StateChanged(self, id, state):
         signalRelated2Id = None
         if state == Qt.Checked:  # ch 2 is checked
-            for signal in self.signalsChannel2:
-                if signal.signalId == id and signal.line not in self.plot_graph2.listDataItems(): # then it was existed so we need to reshoe
+            for signal in self.signalsChannel1:
+                if signal.signalId == id and signal.line not in self.plot_graph.listDataItems(): # then it was existed so we need to reshoe
                     signal.line.setData(signal.time, signal.magnitude)  # reshow the signal in Plot
                     signal.showSignal = True
-                    self.plot_graph2.addItem(signal.line)
+                    self.plot_graph.addItem(signal.line)
                     return
             for signal in self.signalsChannel1: # here there is no id with that , so we need to create new signal object
                 if signal.signalId == id:
                     signalRelated2Id = signal
                     break
             if signalRelated2Id is not None:
-                signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, self.plot_graph2, signalRelated2Id.color,
-                                      len(self.signalsChannel2) + 1, id)
+                signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, self.plot_graph, signalRelated2Id.color,
+                                      len(self.signalsChannel1) + 1, id)
                 signal.showSignal = True
-                self.signalsChannel2.append(signal)
+                self.signalsChannel1.append(signal)
                 yMin, yMax = min(signalRelated2Id.y), max(signalRelated2Id.y)
-                self.plot_graph2.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin, yMax=yMax)
+                self.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin, yMax=yMax)
                 signal.line.setData(signalRelated2Id.time, signalRelated2Id.magnitude)
-                self.plot_graph2.addItem(signal.line)
+                self.plot_graph.addItem(signal.line)
         else:  # ch2 2 is unchecked
-            for signal in self.signalsChannel2:
+            for signal in self.signalsChannel1:
                 if signal.signalId == id:
-                    self.plot_graph2.removeItem(signal.line)  # remove from ch 2
+                    self.plot_graph.removeItem(signal.line)  # remove from ch 2
                     signal.showSignal = False
                     break
 
