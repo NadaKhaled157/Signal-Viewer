@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ChannelEditor(QtWidgets.QFrame):
-    def __init__(self, parent, x, y, width, height, label_text):
+    def __init__(self, parent, x, y, width, height, label_text, signalViewer):
         super().__init__(parent)
         self.setGeometry(QtCore.QRect(x, y, width, height))
         self.setStyleSheet("background-color: rgb(24, 24, 24);")
@@ -36,6 +36,7 @@ class ChannelEditor(QtWidgets.QFrame):
         self.zoomOutButton.setText("")
         self.zoomOutButton.setIcon(zoom_out_icon)
         self.zoomOutButton.setIconSize(QtCore.QSize(24, 24))
+        self.zoomOutButton.clicked.connect(lambda: signalViewer.zoom(zoomIn=False))
 
         # Rewind Button
         self.RewindButton = QtWidgets.QPushButton(self.InnerWindow)
@@ -47,6 +48,8 @@ class ChannelEditor(QtWidgets.QFrame):
                                         "font-weight:800;")
         self.RewindButton.setIcon(rewind_icon)
         self.RewindButton.setText(_translate("MainWindow", " Rewind"))
+        self.RewindButton.clicked.connect(signalViewer.rewindSignal)
+
         
         
 
@@ -61,6 +64,7 @@ class ChannelEditor(QtWidgets.QFrame):
         self.zoomInButton.setText("")
         self.zoomInButton.setIcon(zoom_in_icon)
         self.zoomInButton.setIconSize(QtCore.QSize(24, 24))
+        self.zoomInButton.clicked.connect(lambda: signalViewer.zoom(zoomIn=True))
 
         # Channel Label
         self.ChannelLabel = QtWidgets.QLabel(self.InnerWindow)
@@ -91,6 +95,11 @@ class ChannelEditor(QtWidgets.QFrame):
                                        "    margin: -4px 0;       \n"
                                        "}")
         self.SpeedSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.defaultSpeed = 25
+        self.SpeedSlider.setMinimum(1)
+        self.SpeedSlider.setMaximum(50)
+        self.SpeedSlider.setValue(self.defaultSpeed)
+        self.SpeedSlider.valueChanged.connect(signalViewer.changeSpeed)
 
         # Turtle Icon
         self.turtleLabel = QtWidgets.QLabel(self.InnerWindow)

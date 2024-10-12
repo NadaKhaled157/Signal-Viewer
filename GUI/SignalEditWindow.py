@@ -69,3 +69,8 @@ class SignalEditor(QtWidgets.QFrame):
         self.channel2Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
         self.channel2Checkbox.setText(_translate("MainWindow","Channel 2"))
 
+        def getCheckBox(ch1=True):
+            if ch1:
+                return self.channel1Checkbox
+            else:
+                return self.channel1Checkbox
