@@ -1,9 +1,10 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 class SignalEditor(QtWidgets.QFrame):
-    def __init__(self, parent, x, y, width, height, label_text):
+    def __init__(self, parent, x, y, width, height, label_text, id):
         super().__init__(parent)
-        
+        self.ID=id
+
         # Set geometry and style of SignalEditor window
         self.setGeometry(QtCore.QRect(x, y, width, height))
         self.setStyleSheet("background-color: rgb(24, 24, 24);")
@@ -26,14 +27,30 @@ class SignalEditor(QtWidgets.QFrame):
 
         # Label
         self.SignalLabel = QtWidgets.QLabel(self.InnerSignalWindow)
-        self.SignalLabel.setGeometry(QtCore.QRect(70, 10, 91, 31))
+        self.SignalLabel.setGeometry(QtCore.QRect(60, 10, 150, 31))
         self.SignalLabel.setStyleSheet("color: rgb(255, 255, 255);\n"
                                        "font-size: 18px")
         self.SignalLabel.setText(label_text)
         
+        self.renameTextField = QtWidgets.QLineEdit(self.InnerSignalWindow)
+        self.renameTextField.setGeometry(QtCore.QRect(20, 70, 120, 31))
+        self.renameTextField.setPlaceholderText("New name")
+        self.renameTextField.setStyleSheet(
+            "background-color: rgb(24, 24, 24);\n"
+            "color: rgb(255, 255, 255);\n"
+            "border: 1px solid transparent;\n"  # Use 'solid' for proper border styling
+            "border-radius: 15px;\n"
+            "padding-left: 10px;\n"
+        )
+
+        palette = self.renameTextField.palette()
+        palette.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor(100, 100, 100))  # Set the placeholder text color
+        self.renameTextField.setPalette(palette)
+
+        
         # Rename Button
         self.RenameButton = QtWidgets.QPushButton(self.InnerSignalWindow)
-        self.RenameButton.setGeometry(QtCore.QRect(30, 70, 131, 31))
+        self.RenameButton.setGeometry(QtCore.QRect(150, 70, 50, 30))
         self.RenameButton.setStyleSheet(
             "background-color: rgb(24, 24, 24);\n"
             "color: rgb(255, 255, 255);\n"
@@ -42,11 +59,11 @@ class SignalEditor(QtWidgets.QFrame):
             "font-weight:800;"
         )
         self.RenameButton.setIcon(rename_icon)
-        self.RenameButton.setText(_translate("MainWindow","Rename"))
+        self.RenameButton.setIconSize(QtCore.QSize(20, 20))
         
         # Color Button
         self.ColorButton = QtWidgets.QPushButton(self.InnerSignalWindow)
-        self.ColorButton.setGeometry(QtCore.QRect(30, 120, 131, 31))
+        self.ColorButton.setGeometry(QtCore.QRect(35, 120, 131, 31))
         self.ColorButton.setStyleSheet(
             "background-color: rgb(24, 24, 24);\n"
             "color: rgb(255, 255, 255);\n"
@@ -69,8 +86,10 @@ class SignalEditor(QtWidgets.QFrame):
         self.channel2Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
         self.channel2Checkbox.setText(_translate("MainWindow","Channel 2"))
 
-        def getCheckBox(ch1=True):
-            if ch1:
-                return self.channel1Checkbox
-            else:
-                return self.channel1Checkbox
+    def getCheckBox(self,ch1=True):
+        if ch1:
+            return self.channel1Checkbox
+        else:
+            return self.channel1Checkbox
+    
+        

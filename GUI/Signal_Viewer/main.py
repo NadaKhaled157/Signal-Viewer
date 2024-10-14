@@ -21,9 +21,10 @@ class SignalObject:
         self.time = []
         self.magnitude = []
         self.showSignal = True
+        self.label = f"Signal {str(self.signalNumber)}"
         
         # line will be plotted
-        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name=f"signal{str(self.signalNumber)}")
+        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name = self.label)
 
     def update(self):
         if self.index < len(self.x):
@@ -73,8 +74,8 @@ class SignalCine(QtWidgets.QFrame):
 
         # First graph
         self.plot_graph = pg.PlotWidget()
-        legend = self.plot_graph.addLegend(offset=(-30, 0.5))
-        legend.setBrush(QBrush(QColor(128, 128, 128, 70)))
+        self.legend = self.plot_graph.addLegend(offset=(-30, 0.5))
+        self.legend.setBrush(QBrush(QColor(128, 128, 128, 70)))
         self.plot_graph.showGrid(x=True, y=True)
         self.main_layout.addWidget(self.plot_graph)
 
@@ -122,8 +123,8 @@ class SignalCine(QtWidgets.QFrame):
     def updateSignals(self):
         for signal in self.signalsChannel1:
             signal.update()
-        for signal in self.signalsChannel2:
-            signal.update()
+        # for signal in self.signalsChannel2:
+        #     signal.update()
 
     def uploadSignal(self):
         print("Button clicked")
