@@ -44,11 +44,14 @@ class Ui_MainWindow(object):
 
                 #signal controls
                 self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
-                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 791))
-                self.scrollArea.setWidgetResizable(True)
+                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 900))
+                self.scrollArea.setWidgetResizable(True)  # Ensure the scroll area resizes automatically
                 self.scrollArea.setStyleSheet("background-color: rgb(42, 42, 42); border:0px;")
+                self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
                 self.scrollAreaWidgetContents = QtWidgets.QWidget()
+                self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
                 self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
                 self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
@@ -71,7 +74,6 @@ class Ui_MainWindow(object):
                 
 
 
-                self.scrollAreaWidgetContents.setMinimumHeight(1300)
 
                 #Taskbar Setup
                 self.TaskBar = QtWidgets.QFrame(self.centralwidget)
@@ -116,7 +118,7 @@ class Ui_MainWindow(object):
                 self.ExportButton.setIconSize(QtCore.QSize(20, 20))
                 self.ExportButton.setObjectName("ExportButton")
                 self.Separator = QtWidgets.QFrame(self.centralwidget)
-                self.Separator.setGeometry(QtCore.QRect(290, 450, 1061, 20))
+                self.Separator.setGeometry(QtCore.QRect(290, 450, 750, 20))
                 self.Separator.setStyleSheet("color: rgb(255, 255, 255);")
                 self.Separator.setFrameShape(QtWidgets.QFrame.HLine)
                 self.Separator.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -192,17 +194,31 @@ class Ui_MainWindow(object):
                 self.verticalSliderChannel1.setOrientation(QtCore.Qt.Vertical)
                 self.verticalSliderChannel1.setObjectName("verticalSliderChannel1")
                 self.LinkChannels = QtWidgets.QPushButton(self.centralwidget)
-                self.LinkChannels.setGeometry(QtCore.QRect(940, 60, 131, 31))
+                self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 131, 41))
                 self.LinkChannels.setStyleSheet("background-color: rgb(24, 24, 24);\n"
         "color: rgb(255, 255, 255);\n"
         "border: 1px;\n"
-        "border-radius: 15px;\n"
+        "border-radius: 20px;\n"
         "font-weight:800;")
                 icon10 = QtGui.QIcon()
                 icon10.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.LinkChannels.setIcon(icon10)
                 self.LinkChannels.setObjectName("LinkChannels")
 
+                self.glueButton = QtWidgets.QPushButton(self.centralwidget)
+                self.glueButton.setGeometry(QtCore.QRect(1225, 425, 131, 41))
+                self.glueButton.setStyleSheet("background-color: rgb(24, 24, 24);\n"
+        "color: rgb(255, 255, 255);\n"
+        "border: 1px;\n"
+        "border-radius: 20px;\n"
+        "font-weight:800;")
+                icon11 = QtGui.QIcon()
+                icon11.addPixmap(QtGui.QPixmap("Deliverables/signal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                self.glueButton.setIcon(icon11)
+                self.glueButton.setObjectName("GlueButton")
+
+                
+                
                 #Channel 2 controls
                 self.verticalSliderChannel2 = QtWidgets.QSlider(self.centralwidget)
                 self.verticalSliderChannel2.setGeometry(QtCore.QRect(1050, 510, 16, 261))
@@ -300,18 +316,26 @@ class Ui_MainWindow(object):
                 self.ConnectToWebsite.setText(_translate("MainWindow", "Connect to website"))
                 self.ExportButton.setText(_translate("MainWindow", "Export to PDF"))
                 self.LinkChannels.setText(_translate("MainWindow", " Link channels"))
+                self.glueButton.setText(_translate("MainWindow","Glue Signals"))
+                
 
         def createSignalEditor(self):
-               self.signalID+=1
-               self.signalEditorID+=1
-               signalEditor = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, f"Signal {str(self.signalID)}",self.signalEditorID)
-               signalEditor.RenameButton.clicked.connect(lambda : self.rename(self.signalEditorID))
-               signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(self.signalEditorID))
-               signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(self.signalEditorID))
-               self.signalEditingWindows.append(signalEditor)
-               self.verticalLayout.addWidget(signalEditor)
+               
                signal = self.Channel1Viewer.uploadSignal()
-               self.signals.append(signal)
+               if signal is not None:
+                        self.signalID+=1
+                        self.signalEditorID+=1
+                        self.signals.append(signal)
+                        signalEditor = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 350, f"Signal {str(self.signalID)}",self.signalEditorID)
+                        self.verticalLayout.addWidget(signalEditor)
+                        self.signalEditingWindows.append(signalEditor)
+                        signalEditor.setVisible(True)
+                        self.scrollArea.update()
+                        self.scrollArea.adjustSize()
+
+               signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(signalEditor.ID))
+               signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(signalEditor.ID))
+               
                signalEditor.channel1Checkbox.setChecked(True)
                signalEditor.channel1Checkbox.stateChanged.connect(lambda state, s_id=signal.signalId: self.Channel1Viewer.selectChannel2StateChanged(s_id,state))
                signalEditor.channel2Checkbox.stateChanged.connect(lambda state, s_id=signal.signalId: self.Channel2Viewer.selectChannel2StateChanged(s_id,state))
@@ -319,22 +343,22 @@ class Ui_MainWindow(object):
         def rename(self,signalEditorId):
                 signal = None
                 entered_text = None
-                for id in range ( len(self.signals)):
-                      if id +1 == signalEditorId:
-                             signal = self.signals[id]
-                             signalEditor = self.signalEditingWindows[id]
+                for signal in self.signals:
+                      if signal.signalId == signalEditorId:
+                             signalEditor = self.signalEditingWindows[signal.signalId-1]
                              entered_text = signalEditor.renameTextField.text()
                              if entered_text.strip():
                                 signal.label = entered_text
                                 signalEditor.SignalLabel.setText(entered_text)
+                                signal.rename_signal(entered_text)
                                 break
                              
-                for i, plot_item in enumerate(signal.plot_widget.listDataItems()):
-                        if (plot_item.getData()[1] == signal.y[:len(plot_item.getData()[1])]).all():
-                                if entered_text.strip():
-                                        self.Channel1Viewer.legend.removeItem(plot_item) 
-                                        self.Channel1Viewer.legend.addItem(plot_item,signal.label)
-                                        break
+                # for i, plot_item in enumerate(signal.plot_widget.listDataItems()):
+                #         if (plot_item.getData()[1] == signal.y[:len(plot_item.getData()[1])]).all():
+                #                 if entered_text.strip():
+                #                         self.Channel1Viewer.legend.removeItem(plot_item) 
+                #                         self.Channel1Viewer.legend.addItem(plot_item,signal.label)
+                #                         break
 
         def changeColor(self,signalEditorID):
                 color = QColorDialog.getColor()
@@ -342,16 +366,12 @@ class Ui_MainWindow(object):
                 if color.isValid():
                         signal = None
                         # Apply the selected color to the signal
-                        for id in range (len(self.signals)):
-                               if id+1 == signalEditorID:
-                                      signal = self.signals[id]
+                        for signal in self.signals:
+                               if signal.signalId == signalEditorID:
                                       signal.color = color
+                                      signal.change_color(color)
                                       break
-                        for i, plot_item in enumerate(signal.plot_widget.listDataItems()):
-                                if (plot_item.getData()[1] == signal.y[:len(plot_item.getData()[1])]).all():
-                                        plot_item.setPen(pg.mkPen(color = color, width=2.5))
-                                        break       
-
+                        
 
 
 if __name__ == "__main__":

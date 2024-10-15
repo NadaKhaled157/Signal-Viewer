@@ -10,21 +10,24 @@ import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 
 class SignalObject:
-    def __init__(self, x_data, y_data, plot_widget, color, signalNumber, signalId):
+    def __init__(self, x_data, y_data, plot_widget, color, name, signalId):
+        self.name = name
+        
+
+        # line will be plotted
+
         self.x = x_data
         self.y = y_data
         self.signalId = signalId
         self.color = color
-        self.signalNumber = signalNumber
         self.plot_widget = plot_widget
         self.index = 0
         self.time = []
         self.magnitude = []
         self.showSignal = True
-        self.label = f"Signal {str(self.signalNumber)}"
         
         # line will be plotted
-        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name = self.label)
+        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name = self.name)
 
     def update(self):
         if self.index < len(self.x):
@@ -39,7 +42,17 @@ class SignalObject:
                     self.plot_widget.setXRange(self.x[0], self.x[399])
             else:
                 self.plot_widget.setXRange(self.x[0], self.x[399]) # this to make the graph as the first appearance
+    def rename_signal(self,name):
+        self.name = name
+        self.line.clear()
+        self.plot_widget.legend.removeItem(self.line)
+        self.line = self.plot_widget.plot(self.time, self.magnitude,pen=pg.mkPen(color=self.color, width=2.5), name=name)
+    def change_color(self, color):
 
+        self.color = color
+        self.line.clear()
+        self.plot_widget.legend.removeItem(self.line)
+        self.line = self.plot_widget.plot(self.time, self.magnitude,pen=pg.mkPen(color=color, width=2.5), name=self.name)
 
 
             # scroll if more than 400 points are plotted
@@ -74,8 +87,9 @@ class SignalCine(QtWidgets.QFrame):
 
         # First graph
         self.plot_graph = pg.PlotWidget()
-        self.legend = self.plot_graph.addLegend(offset=(-30, 0.5))
-        self.legend.setBrush(QBrush(QColor(128, 128, 128, 70)))
+        legend = self.plot_graph.addLegend(offset=(-30, 0.5))
+        legend.setBrush(QBrush(QColor(128, 128, 128, 70)))
+        self.plot_graph.legend = legend
         self.plot_graph.showGrid(x=True, y=True)
         self.main_layout.addWidget(self.plot_graph)
 
@@ -135,7 +149,7 @@ class SignalCine(QtWidgets.QFrame):
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             self.used_color.add(color)
             self.signalId += 1
-            signal = SignalObject(x, y, self.plot_graph, color, len(self.signalsChannel1)+1, self.signalId)
+            signal = SignalObject(x, y, self.plot_graph, color, f"signal {len(self.signalsChannel1)+1}", self.signalId)
             self.signalsChannel1.append(signal)
 
             # # Dynamically creation of checkboxes
