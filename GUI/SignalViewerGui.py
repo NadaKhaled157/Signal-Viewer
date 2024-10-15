@@ -194,16 +194,18 @@ class Ui_MainWindow(object):
                 self.verticalSliderChannel1.setOrientation(QtCore.Qt.Vertical)
                 self.verticalSliderChannel1.setObjectName("verticalSliderChannel1")
                 self.LinkChannels = QtWidgets.QPushButton(self.centralwidget)
-                self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 131, 41))
+                self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 141, 41))
                 self.LinkChannels.setStyleSheet("background-color: rgb(24, 24, 24);\n"
         "color: rgb(255, 255, 255);\n"
         "border: 1px;\n"
         "border-radius: 20px;\n"
         "font-weight:800;")
-                icon10 = QtGui.QIcon()
-                icon10.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                self.LinkChannels.setIcon(icon10)
+                self.icon10 = QtGui.QIcon()
+                self.icon10.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                self.LinkChannels.setIcon(self.icon10)
+                self.LinkChannels.setCheckable(True)
                 self.LinkChannels.setObjectName("LinkChannels")
+                self.LinkChannels.toggled.connect(self.linkTwoChannels)
 
                 self.glueButton = QtWidgets.QPushButton(self.centralwidget)
                 self.glueButton.setGeometry(QtCore.QRect(1225, 425, 131, 41))
@@ -318,6 +320,143 @@ class Ui_MainWindow(object):
                 self.LinkChannels.setText(_translate("MainWindow", " Link channels"))
                 self.glueButton.setText(_translate("MainWindow","Glue Signals"))
                 
+        def linkTwoChannels(self,checked):
+                if checked:
+                        # Button is toggled ON
+                        self.LinkChannels.setStyleSheet("background-color: green;\n"
+                                                        "color: white;\n"
+                                                        "border: 1px;\n"
+                                                        "border-radius: 20px;\n"
+                                                        "font-weight:800;")
+                        # Change icon when toggled ON (if you have a different icon for this state)
+                        iconOn = QtGui.QIcon()
+                        iconOn.addPixmap(QtGui.QPixmap("GUI/Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                        self.LinkChannels.setIcon(iconOn)
+                        self.LinkChannels.setText("Unlink channels")
+                        self.Channel1Viewer.rewindSignal()
+                        self.Channel2Viewer.rewindSignal()
+
+                        # Disconnect any existing connections from Play/Pause buttons
+                        self.PlayChannel1.clicked.disconnect()
+                        self.PlayChannel2.clicked.disconnect()
+                        self.PauseChannel1.clicked.disconnect()
+                        self.PauseChannel2.clicked.disconnect()
+                        self.Channel1Editor.zoomInButton.clicked.disconnect()
+                        self.Channel1Editor.zoomOutButton.clicked.disconnect()
+                        self.Channel2Editor.zoomInButton.clicked.disconnect()
+                        self.Channel2Editor.zoomOutButton.clicked.disconnect()
+                        self.Channel1Editor.RewindButton.clicked.disconnect()
+                        self.Channel2Editor.RewindButton.clicked.disconnect()
+                        self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
+                        self.Channel2Editor.SpeedSlider.valueChanged.disconnect()
+
+                        # Connect to the linked play/pause functions
+                        # Connect to the wrapped play/pause functions
+                        self.PlayChannel1.clicked.connect(self.wrappedPlay)
+                        self.PlayChannel2.clicked.connect(self.wrappedPlay)
+                        self.PauseChannel1.clicked.connect(self.wrappedPause)
+                        self.PauseChannel2.clicked.connect(self.wrappedPause)
+                        
+                        self.Channel1Editor.zoomInButton.clicked.connect(self.wrappedZoomIn)
+                        self.Channel1Editor.zoomOutButton.clicked.connect(self.wrappedZoomOut)
+                        self.Channel2Editor.zoomInButton.clicked.connect(self.wrappedZoomIn)
+                        self.Channel2Editor.zoomOutButton.clicked.connect(self.wrappedZoomOut)
+                        self.Channel1Editor.RewindButton.clicked.connect(self.wrappedRewind)
+                        self.Channel2Editor.RewindButton.clicked.connect(self.wrappedRewind)
+                        
+                        self.Channel1Editor.SpeedSlider.valueChanged.connect(self.syncSliders)
+                        self.Channel2Editor.SpeedSlider.valueChanged.connect(self.syncSliders)
+
+                else:
+                        # Button is toggled OFF (revert to original state)
+                        self.LinkChannels.setStyleSheet("background-color: rgb(24, 24, 24);\n"
+                                                        "color: rgb(255, 255, 255);\n"
+                                                        "border: 1px;\n"
+                                                        "border-radius: 20px;\n"
+                                                        "font-weight:800;")
+                        # Revert to the original icon
+                        self.LinkChannels.setIcon(self.icon10)
+                        self.LinkChannels.setText("link channels")
+                        self.Channel1Viewer.rewindSignal()
+                        self.Channel2Viewer.rewindSignal()
+
+                        self.PlayChannel1.clicked.disconnect()
+                        self.PlayChannel2.clicked.disconnect()
+                        self.PauseChannel1.clicked.disconnect()
+                        self.PauseChannel2.clicked.disconnect()
+                        self.Channel1Editor.zoomInButton.clicked.disconnect()
+                        self.Channel1Editor.zoomOutButton.clicked.disconnect()
+                        self.Channel2Editor.zoomInButton.clicked.disconnect()
+                        self.Channel2Editor.zoomOutButton.clicked.disconnect()
+                        self.Channel1Editor.RewindButton.clicked.disconnect()
+                        self.Channel2Editor.RewindButton.clicked.disconnect()
+                        self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
+                        self.Channel2Editor.SpeedSlider.valueChanged.disconnect()
+                        
+                        self.PlayChannel1.clicked.connect(self.Channel1Viewer.playSignal)
+                        self.PlayChannel2.clicked.connect(self.Channel2Viewer.playSignal)
+                        self.PauseChannel1.clicked.connect(self.Channel1Viewer.pauseSignal)
+                        self.PauseChannel2.clicked.connect(self.Channel2Viewer.pauseSignal)
+
+                        self.Channel1Editor.zoomInButton.clicked.connect(lambda: self.Channel1Viewer.zoom(zoomIn=True))
+                        self.Channel1Editor.zoomOutButton.clicked.connect(lambda: self.Channel1Viewer.zoom(zoomIn=False))
+                        self.Channel2Editor.zoomInButton.clicked.connect(lambda: self.Channel2Viewer.zoom(zoomIn=True))
+                        self.Channel2Editor.zoomOutButton.clicked.connect(lambda: self.Channel2Viewer.zoom(zoomIn=False))
+                        self.Channel1Editor.RewindButton.clicked.connect(self.Channel1Viewer.rewindSignal)
+                        self.Channel2Editor.RewindButton.clicked.connect(self.Channel2Viewer.rewindSignal)
+                        self.Channel1Editor.SpeedSlider.valueChanged.connect(self.Channel1Viewer.changeSpeed)
+                        self.Channel2Editor.SpeedSlider.valueChanged.connect(self.Channel2Viewer.changeSpeed)
+
+
+                        
+
+        def wrappedPlay(self):
+        
+                self.Channel1Viewer.playSignal()
+                self.Channel2Viewer.playSignal()
+        def wrappedPause(self):
+        
+                self.Channel1Viewer.pauseSignal()
+                self.Channel2Viewer.pauseSignal()
+
+        def wrappedZoomIn(self):
+               self.Channel1Viewer.zoom(zoomIn=True)
+               self.Channel2Viewer.zoom(zoomIn=True)
+
+        def wrappedZoomOut(self):
+               self.Channel1Viewer.zoom(zoomIn=False)
+               self.Channel2Viewer.zoom(zoomIn=False)
+        
+        def wrappedRewind(self):
+               self.Channel1Viewer.rewindSignal()
+               self.Channel2Viewer.rewindSignal()
+
+        
+
+        def syncSliders(self, value):
+                # Temporarily block signals to avoid triggering each other recursively
+                self.Channel1Editor.SpeedSlider.blockSignals(True)
+                self.Channel2Editor.SpeedSlider.slider2.blockSignals(True)
+                
+                # Set the value of both sliders to the same position
+                if self.sender() == self.slider1:
+                        self.Channel1Editor.SpeedSlider.setValue(value)
+                else:
+                        self.Channel2Editor.SpeedSlider.setValue(value)
+                
+                # Unblock the signals after setting the values
+                self.Channel1Editor.SpeedSlider.blockSignals(False)
+                self.Channel2Editor.SpeedSlider.blockSignals(False)
+
+                # Now call your wrappedChangeSpeed function with the updated slider value
+                self.wrappedChangeSpeed(value)
+
+        def wrappedChangeSpeed(self,value):
+               speed_multiplier = value / 100  # assuming the slider ranges from 50 to 200 for 0.5x to 2x speed
+
+                # Apply the speed change to both viewers
+               self.Channel1Viewer.changeSpeed(speed_multiplier)
+               self.Channel2Viewer.changeSpeed(speed_multiplier)
 
         def createSignalEditor(self):
                
