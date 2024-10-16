@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt, QPoint, QRect
 import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from scipy.interpolate import interp1d
-from scipy import stats
+
 class SignalObject:
     def __init__(self, x_data, y_data, plot_widget, color, name,signalId):
         self.name = name
@@ -65,19 +65,11 @@ class SignalObject:
             #     self.plot_widget.setXRange(self.time[-400], self.time[-1])
             # else:
             #     self.plot_widget.setXRange(self.x[0], self.x[399])
-
     def signalStatistics(self):
-        mean_value = np.mean(self.y)
-        median_value = np.median(self.y)
-        std_value = np.std(self.y)
-        min_value = np.min(self.y)
-        max_value = np.max(self.y)
-
-        duration = self.x[-1] - self.x[0]
-        return [mean_value, median_value,  std_value, min_value, max_value,  duration]
+        pass
 
 class SignalCine(QtWidgets.QFrame):
-    def __init__(self, parent, x, y, width, height, scrollBarHorizontal, scrollBarVertical):
+    def __init__(self, parent, x, y, width, height,scrollBarHorizontal, scrollBarVertical):
         super().__init__(parent)
         
         # Set geometry and layout
@@ -281,10 +273,7 @@ class SignalCine(QtWidgets.QFrame):
 
         self.plot_graph.setXRange(new_x_range[0], new_x_range[1], padding=0)
         self.plot_graph.setYRange(new_y_range[0], new_y_range[1], padding=0)
-
-
-
-
+        
 
 
 
