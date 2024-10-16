@@ -10,14 +10,15 @@ import threading
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
 class GlueOptions(QDialog):
-    def __init__(self, portionx1, portiony1, portionx2, portiony2):
+    def __init__(self, portionx1, portiony1, portionx2, portiony2,gluedSignals, main_window):
         super().__init__()
+        self.main_window = main_window
         self.portion_x1 = portionx1
         self.portion_y1 = portiony1
         self.portion_x2 = portionx2
         self.portion_y2 = portiony2
         self.interpolation_order = "linear"
-
+        self.gluedSignals = gluedSignals
         self.setStyleSheet("background-color: #181818;")
         self.setFixedSize(800, 600)
 
@@ -83,6 +84,10 @@ class GlueOptions(QDialog):
         show_glued_signal_button.clicked.connect(self.showGluedSignal)
         show_glued_signal_button.setStyleSheet("font-size: 20px; border-radius: 10px; background-color: white;")
         shift_buttons_layout.addWidget(show_glued_signal_button)
+        show_report_button = QPushButton("Show report", self)
+        show_report_button.setFixedSize(170, 40)
+        show_report_button.setGeometry(400, 550, 400, 400)
+        show_glued_signal_button.clicked.connect(self.showReport)
 
         # Input for shift amount
         self.shift_amount_input = QLineEdit(self)
@@ -96,6 +101,7 @@ class GlueOptions(QDialog):
         # self.plot_graph_glued_signal = pg.PlotWidget()
         # self.plot_graph_glued_signal.showGrid(x=True, y=True)
         # self.main_glue_options_layout.addWidget(self.plot_graph_glued_signal)
+
 
         # Plotting the signals
         self.line_signal1 = self.plot_graph_glue_options.plot(self.portion_x1, self.portion_y1,
@@ -198,6 +204,10 @@ class GlueOptions(QDialog):
 
                 print(glued_x)
                 return glued_x, glued_y
+    def showReport(self):
+        signal1, signal2 = self.gluedSignals[0], self.gluedSignals[1]
+        self.main_window.ui.export_to_pdf(signal1.signalStatistics(), signal2.signalStatistics())
+        pass
 
     def showGluedSignal(self):
         self.submit()
@@ -234,6 +244,7 @@ class MyMainWindow(QMainWindow):
         self.portion_y1 = []
         self.portion_x2 = []
         self.portion_y2 = []
+        self.toBeGluedSignals = []
 
         self.begin, self.destination = QPoint(), QPoint()
         self.rectangles = []
@@ -364,6 +375,7 @@ class MyMainWindow(QMainWindow):
                 max_new_range_x_axis - min_new_range_x_axis) + min_new_range_x_axis
 
         signal = current_viewer.signalsChannel[-1]  # we need to determine which signal we will take the glaw of it
+        self.toBeGluedSignals.append(signal)
         signal_xdata = signal.x
         signal_ydata = signal.y
         initial_index, final_index = 0, 0
@@ -383,7 +395,7 @@ class MyMainWindow(QMainWindow):
         print("Glue options method called in MyMainWindow")
         if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(self, 'portion_y2'):
             print("Portions are available")
-            glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2)
+            glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,self.toBeGluedSignals, self)
             glue_window.exec_()
 
 
