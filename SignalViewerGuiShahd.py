@@ -14,20 +14,13 @@ from ChannelEditor import ChannelEditor
 # from ChannelViewer import ChannelViewer
 from SignalEditWindow import SignalEditor
 from Signal_Viewer.main import *
-from Signal_Viewer.PolarSignal import PolarWindow
-from Signal_Viewer.LiveSignal import DataFetcher
-from Signal_Viewer.ExportToPdf import ExportToPdf
-import time
-import threading
 
 
 
-class Ui_MainWindow(QtWidgets.QMainWindow):
+class Ui_MainWindow(object):
         def setupUi(self, MainWindow):
 
                 #Window Setup
-                app_icon =  QtGui.QIcon('Deliverables/app icon.png')
-                MainWindow.setWindowIcon(app_icon)
                 MainWindow.setObjectName("Signal Viewer")
                 MainWindow.setFixedSize(1379, 870)
                 MainWindow.setMouseTracking(False)
@@ -40,17 +33,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.signals = [];
                 self.signalID = 0;
                 self.signalEditorID=0;
-                self.isSyncEnabled = False 
-
-                # LIVE SIGNAL VARIABLES
-                self.thread = None
-                self.fetch_subscriber_count = DataFetcher()
-                self.fetch_subscriber_count.live_signal.connect(self.update_count)
-                self.timestamps = []
-                self.subscriber_counts = []
-                self.start_time = time.time()
-
-
                 self.horizontalSliderChannel1 = QtWidgets.QSlider(self.centralwidget)
                 self.horizontalSliderChannel1.setGeometry(QtCore.QRect(390, 410, 611, 16))
                 self.horizontalSliderChannel1.setStyleSheet("QSlider::groove:horizontal {\n"
@@ -138,6 +120,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                 self.Channel1Editor = ChannelEditor(self.centralwidget, 1090, 100, 261, 281, "Channel 1", self.Channel1Viewer)
                 self.Channel2Editor = ChannelEditor(self.centralwidget, 1090, 500, 261, 281, "Channel 2", self.Channel2Viewer)
+                # self.Channel2Viewer.timer.start()
+                # self.Channel2Viewer.timer.timeout.connect(self.Channel2Viewer.updateSignals)
+                #self.Channel1Viewer.timer.start()
+                #self.Channel1Viewer.timer.timeout.connect(self.Channel2Viewer.updateSignals)
+
 
                 #signal controls
                 self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
@@ -192,48 +179,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.UploadButton.setObjectName("UploadButton")
                 self.UploadButton.clicked.connect(self.createSignalEditor)
 
-                # LIVE SIGNAL BUTTONS
-
                 self.ConnectToWebsite = QtWidgets.QPushButton(self.TaskBar)
-                self.ConnectToWebsite.setGeometry(QtCore.QRect(470, 10, 171, 28))
+                self.ConnectToWebsite.setGeometry(QtCore.QRect(630, 10, 171, 28))
                 self.ConnectToWebsite.setStyleSheet("color: rgb(255, 255, 255);\n"
         "font-size: 15px;\n"
         "background-color:transparent;\n"
         "font-weight:800;")
-                self.ConnectToWebsite.clicked.connect(lambda: self.live_connection('connect'))
                 icon6 = QtGui.QIcon()
-                icon6.addPixmap(QtGui.QPixmap("Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon6.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ConnectToWebsite.setIcon(icon6)
-
-                self.DisconnectFromWebsite = QtWidgets.QPushButton(self.TaskBar)
-                self.DisconnectFromWebsite.setGeometry(QtCore.QRect(670, 10, 171, 28))
-                self.DisconnectFromWebsite.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                                    "font-size: 15px;\n"
-                                                    "background-color:transparent;\n"
-                                                    "font-weight:800;")
-                self.DisconnectFromWebsite.clicked.connect(lambda: self.live_connection('connect'))
-                icon12 = QtGui.QIcon()
-                icon12.addPixmap(QtGui.QPixmap(
-                        "Deliverables/disconnect_icon.png"),
-                                QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                self.DisconnectFromWebsite.setIcon(icon12)
-                #
-
-                self.DisconnectFromWebsite.setIconSize(QtCore.QSize(20, 20))
-                self.DisconnectFromWebsite.setObjectName("DisconnectFromWebsite")
+                self.ConnectToWebsite.setIconSize(QtCore.QSize(20, 20))
+                self.ConnectToWebsite.setObjectName("ConnectToWebsite")
                 self.ExportButton = QtWidgets.QPushButton(self.TaskBar)
-                self.ExportButton.setGeometry(QtCore.QRect(860, 10, 141, 31))
+                self.ExportButton.setGeometry(QtCore.QRect(850, 10, 141, 31))
                 self.ExportButton.setStyleSheet("color: rgb(255, 255, 255);\n"
         "font-size: 15px;\n"
         "background-color:transparent;\n"
         "font-weight:800;")
-                self.ExportButton.clicked.connect(lambda: self.export_to_pdf({"sig1":10}, {"sig2":12})) # add actual stats
                 icon7 = QtGui.QIcon()
-                icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon7.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ExportButton.setIcon(icon7)
                 self.ExportButton.setIconSize(QtCore.QSize(20, 20))
                 self.ExportButton.setObjectName("ExportButton")
-
                 self.Separator = QtWidgets.QFrame(self.centralwidget)
                 self.Separator.setGeometry(QtCore.QRect(290, 450, 750, 20))
                 self.Separator.setStyleSheet("color: rgb(255, 255, 255);")
@@ -272,19 +239,57 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.PauseChannel1.setObjectName("PauseChannel1")
                 self.PauseChannel1.clicked.connect(self.Channel1Viewer.pauseSignal)
 
+        #         self.horizontalSliderChannel1 = QtWidgets.QSlider(self.centralwidget)
+        #         self.horizontalSliderChannel1.setGeometry(QtCore.QRect(390, 410, 611, 16))
+        #         self.horizontalSliderChannel1.setStyleSheet("QSlider::groove:horizontal {\n"
+        # "    height: 5px;\n"
+        # "    background: white;  \n"
+        # "    border-radius: 3px;    \n"
+        # "}\n"
+        # "\n"
+        # "QSlider::handle:horizontal {\n"
+        # "    background: #000000;  \n"
+        # "    border: 1px solid #333333;\n"
+        # "    width: 10px;\n"
+        # "    height: 10px;\n"
+        # "    border-radius: 6px;    \n"
+        # "    margin: -4px 0;       \n"
+        # "}\n"
+        # "")
+        #         self.horizontalSliderChannel1.setOrientation(QtCore.Qt.Horizontal)
+        #         self.horizontalSliderChannel1.setObjectName("horizontalSliderChannel1")
+        #
+        #
+        #         self.verticalSliderChannel1 = QtWidgets.QSlider(self.centralwidget)
+        #         self.verticalSliderChannel1.setGeometry(QtCore.QRect(1050, 110, 16, 261))
+        #         self.verticalSliderChannel1.setStyleSheet("QSlider::groove:vertical {\n"
+        # "    width: 6px;\n"
+        # "    background: white;  \n"
+        # "    border-radius: 3px;   \n"
+        # "}\n"
+        # "\n"
+        # "QSlider::handle:vertical {\n"
+        # "    background: #000000;   \n"
+        # "    border: 1px solid #333333;\n"
+        # "    width: 10px;\n"
+        # "    height: 10px;\n"
+        # "    border-radius: 5px;    \n"
+        # "    margin: 0 -4px;       \n"
+        # "}\n"
+        # "")
+        #         self.verticalSliderChannel1.setOrientation(QtCore.Qt.Vertical)
+        #         self.verticalSliderChannel1.setObjectName("verticalSliderChannel1")
                 self.LinkChannels = QtWidgets.QPushButton(self.centralwidget)
-                self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 141, 41))
+                self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 131, 41))
                 self.LinkChannels.setStyleSheet("background-color: rgb(24, 24, 24);\n"
         "color: rgb(255, 255, 255);\n"
         "border: 1px;\n"
         "border-radius: 20px;\n"
         "font-weight:800;")
-                self.icon10 = QtGui.QIcon()
-                self.icon10.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                self.LinkChannels.setIcon(self.icon10)
-                self.LinkChannels.setCheckable(True)
+                icon10 = QtGui.QIcon()
+                icon10.addPixmap(QtGui.QPixmap("D:\\College\\Third year\\First Term\\DSP\\Tasks\\Task 1\\Signal-Viewer\\GUI\\Deliverables/link.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                self.LinkChannels.setIcon(icon10)
                 self.LinkChannels.setObjectName("LinkChannels")
-                self.LinkChannels.toggled.connect(self.linkTwoChannels)
 
                 self.glueButton = QtWidgets.QPushButton(self.centralwidget)
                 self.glueButton.setGeometry(QtCore.QRect(1225, 425, 131, 41))
@@ -298,6 +303,47 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.glueButton.setIcon(icon11)
                 self.glueButton.setObjectName("GlueButton")
 
+                
+                
+        #         #Channel 2 controls
+        #         self.verticalSliderChannel2 = QtWidgets.QSlider(self.centralwidget)
+        #         self.verticalSliderChannel2.setGeometry(QtCore.QRect(1050, 510, 16, 261))
+        #         self.verticalSliderChannel2.setStyleSheet("QSlider::groove:vertical {\n"
+        # "    width: 6px;\n"
+        # "    background: white;  \n"
+        # "    border-radius: 3px;   \n"
+        # "}\n"
+        # "\n"
+        # "QSlider::handle:vertical {\n"
+        # "    background: #000000;   \n"
+        # "    border: 1px solid #333333;\n"
+        # "    width: 10px;\n"
+        # "    height: 10px;\n"
+        # "    border-radius: 5px;    \n"
+        # "    margin: 0 -4px;       \n"
+        # "}\n"
+        # "")
+        #         self.verticalSliderChannel2.setOrientation(QtCore.Qt.Vertical)
+        #         self.verticalSliderChannel2.setObjectName("verticalSliderChannel2")
+        #         self.horizontalSliderChannel2 = QtWidgets.QSlider(self.centralwidget)
+        #         self.horizontalSliderChannel2.setGeometry(QtCore.QRect(390, 810, 611, 16))
+        #         self.horizontalSliderChannel2.setStyleSheet("QSlider::groove:horizontal {\n"
+        # "    height: 5px;\n"
+        # "    background: white;  \n"
+        # "    border-radius: 3px;    \n"
+        # "}\n"
+        # "\n"
+        # "QSlider::handle:horizontal {\n"
+        # "    background: #000000;  \n"
+        # "    border: 1px solid #333333;\n"
+        # "    width: 10px;\n"
+        # "    height: 10px;\n"
+        # "    border-radius: 6px;    \n"
+        # "    margin: -4px 0;       \n"
+        # "}\n"
+        # "")
+        #         self.horizontalSliderChannel2.setOrientation(QtCore.Qt.Horizontal)
+        #         self.horizontalSliderChannel2.setObjectName("horizontalSliderChannel2")
                 self.PauseChannel2 = QtWidgets.QPushButton(self.centralwidget)
                 self.PauseChannel2.setGeometry(QtCore.QRect(340, 800, 31, 31))
                 self.PauseChannel2.setStyleSheet("color: rgb(255, 255, 255);\n"
@@ -327,7 +373,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 
                 self.Channel1Viewer.raise_()
                 self.Channel1Editor.raise_()
-                # self.Channel2Viewer.raise_()
+                self.Channel2Viewer.raise_()
+                self.Channel2Editor.raise_()
                 self.TaskBar.raise_()
                 self.Separator.raise_()
                 self.PlayChannel1.raise_()
@@ -339,7 +386,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.horizontalSliderChannel2.raise_()
                 self.PauseChannel2.raise_()
                 self.PlayChannel2.raise_()
-                self.Channel2Editor.raise_()
                 MainWindow.setCentralWidget(self.centralwidget)
                 self.statusbar = QtWidgets.QStatusBar(MainWindow)
                 self.statusbar.setObjectName("statusbar")
@@ -351,149 +397,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         def retranslateUi(self, MainWindow):
                 _translate = QtCore.QCoreApplication.translate
-                MainWindow.setWindowTitle(_translate("MainWindow", "Signal Viewer"))
+                MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
                 self.UploadButton.setText(_translate("MainWindow", "Upload File"))
                 self.ConnectToWebsite.setText(_translate("MainWindow", "Connect to website"))
-                self.DisconnectFromWebsite.setText(_translate("MainWindow", "Disconnect"))
                 self.ExportButton.setText(_translate("MainWindow", "Export to PDF"))
                 self.LinkChannels.setText(_translate("MainWindow", " Link channels"))
                 self.glueButton.setText(_translate("MainWindow","Glue Signals"))
                 
-        def linkTwoChannels(self,checked):
-                self.isSyncEnabled = checked
-                if checked:
-                        # Button is toggled ON
-
-                        self.LinkChannels.setStyleSheet("background-color: green;\n"
-                                                        "color: white;\n"
-                                                        "border: 1px;\n"
-                                                        "border-radius: 20px;\n"
-                                                        "font-weight:800;")
-                        # Change icon when toggled ON (if you have a different icon for this state)
-                        iconOn = QtGui.QIcon()
-                        iconOn.addPixmap(QtGui.QPixmap("GUI/Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                        self.LinkChannels.setIcon(iconOn)
-                        self.LinkChannels.setText("Unlink channels")
-                        self.Channel1Viewer.rewindSignal()
-                        self.Channel2Viewer.rewindSignal()
-
-                        # Disconnect any existing connections from Play/Pause buttons
-                        self.PlayChannel1.clicked.disconnect()
-                        self.PlayChannel2.clicked.disconnect()
-                        self.PauseChannel1.clicked.disconnect()
-                        self.PauseChannel2.clicked.disconnect()
-                        self.Channel1Editor.zoomInButton.clicked.disconnect()
-                        self.Channel1Editor.zoomOutButton.clicked.disconnect()
-                        self.Channel2Editor.zoomInButton.clicked.disconnect()
-                        self.Channel2Editor.zoomOutButton.clicked.disconnect()
-                        self.Channel1Editor.RewindButton.clicked.disconnect()
-                        self.Channel2Editor.RewindButton.clicked.disconnect()
-                        self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
-                        self.Channel2Editor.SpeedSlider.valueChanged.disconnect()
-
-                        # Connect to the linked play/pause functions
-                        # Connect to the wrapped play/pause functions
-                        self.PlayChannel1.clicked.connect(self.wrappedPlay)
-                        self.PlayChannel2.clicked.connect(self.wrappedPlay)
-                        self.PauseChannel1.clicked.connect(self.wrappedPause)
-                        self.PauseChannel2.clicked.connect(self.wrappedPause)
-                        
-                        self.Channel1Editor.zoomInButton.clicked.connect(self.wrappedZoomIn)
-                        self.Channel1Editor.zoomOutButton.clicked.connect(self.wrappedZoomOut)
-                        self.Channel2Editor.zoomInButton.clicked.connect(self.wrappedZoomIn)
-                        self.Channel2Editor.zoomOutButton.clicked.connect(self.wrappedZoomOut)
-                        self.Channel1Editor.RewindButton.clicked.connect(self.wrappedRewind)
-                        self.Channel2Editor.RewindButton.clicked.connect(self.wrappedRewind)
-                        
-                        self.Channel1Editor.SpeedSlider.valueChanged.connect(self.syncSliders)
-                        self.Channel2Editor.SpeedSlider.valueChanged.connect(self.syncSliders)
-
-                else:
-                        # Button is toggled OFF (revert to original state)
-                        self.LinkChannels.setStyleSheet("background-color: rgb(24, 24, 24);\n"
-                                                        "color: rgb(255, 255, 255);\n"
-                                                        "border: 1px;\n"
-                                                        "border-radius: 20px;\n"
-                                                        "font-weight:800;")
-                        # Revert to the original icon
-                        self.LinkChannels.setIcon(self.icon10)
-                        self.LinkChannels.setText("link channels")
-                        self.Channel1Viewer.rewindSignal()
-                        self.Channel2Viewer.rewindSignal()
-
-                        self.PlayChannel1.clicked.disconnect()
-                        self.PlayChannel2.clicked.disconnect()
-                        self.PauseChannel1.clicked.disconnect()
-                        self.PauseChannel2.clicked.disconnect()
-                        self.Channel1Editor.zoomInButton.clicked.disconnect()
-                        self.Channel1Editor.zoomOutButton.clicked.disconnect()
-                        self.Channel2Editor.zoomInButton.clicked.disconnect()
-                        self.Channel2Editor.zoomOutButton.clicked.disconnect()
-                        self.Channel1Editor.RewindButton.clicked.disconnect()
-                        self.Channel2Editor.RewindButton.clicked.disconnect()
-                        self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
-                        self.Channel2Editor.SpeedSlider.valueChanged.disconnect()
-                        
-                        self.PlayChannel1.clicked.connect(self.Channel1Viewer.playSignal)
-                        self.PlayChannel2.clicked.connect(self.Channel2Viewer.playSignal)
-                        self.PauseChannel1.clicked.connect(self.Channel1Viewer.pauseSignal)
-                        self.PauseChannel2.clicked.connect(self.Channel2Viewer.pauseSignal)
-
-                        self.Channel1Editor.zoomInButton.clicked.connect(lambda: self.Channel1Viewer.zoom(zoomIn=True))
-                        self.Channel1Editor.zoomOutButton.clicked.connect(lambda: self.Channel1Viewer.zoom(zoomIn=False))
-                        self.Channel2Editor.zoomInButton.clicked.connect(lambda: self.Channel2Viewer.zoom(zoomIn=True))
-                        self.Channel2Editor.zoomOutButton.clicked.connect(lambda: self.Channel2Viewer.zoom(zoomIn=False))
-                        self.Channel1Editor.RewindButton.clicked.connect(self.Channel1Viewer.rewindSignal)
-                        self.Channel2Editor.RewindButton.clicked.connect(self.Channel2Viewer.rewindSignal)
-                        self.Channel1Editor.SpeedSlider.valueChanged.connect(self.Channel1Viewer.changeSpeed)
-                        self.Channel2Editor.SpeedSlider.valueChanged.connect(self.Channel2Viewer.changeSpeed)
-
-
-                        
-
-        def wrappedPlay(self):
-        
-                self.Channel1Viewer.playSignal()
-                self.Channel2Viewer.playSignal()
-        def wrappedPause(self):
-        
-                self.Channel1Viewer.pauseSignal()
-                self.Channel2Viewer.pauseSignal()
-
-        def wrappedZoomIn(self):
-               self.Channel1Viewer.zoom(zoomIn=True)
-               self.Channel2Viewer.zoom(zoomIn=True)
-
-        def wrappedZoomOut(self):
-               self.Channel1Viewer.zoom(zoomIn=False)
-               self.Channel2Viewer.zoom(zoomIn=False)
-        
-        def wrappedRewind(self):
-               self.Channel1Viewer.rewindSignal()
-               self.Channel2Viewer.rewindSignal()
-
-        
-
-        def syncSliders(self, value):
-                
-                print(f"syncSliders called with value: {value}, isSyncEnabled: {self.isSyncEnabled}")
-                if self.isSyncEnabled:
-                        sender = self.sender()
-                        if sender == self.Channel1Editor.SpeedSlider:
-                                self.Channel2Editor.SpeedSlider.blockSignals(True)
-                                self.Channel2Editor.SpeedSlider.setValue(value)
-                                self.Channel2Editor.SpeedSlider.blockSignals(False)
-                        elif sender == self.Channel2Editor.SpeedSlider:
-                                self.Channel1Editor.SpeedSlider.blockSignals(True)
-                                self.Channel1Editor.SpeedSlider.setValue(value)
-                                self.Channel1Editor.SpeedSlider.blockSignals(False)
-                        self.wrappedChangeSpeed(value)
-
-        def wrappedChangeSpeed(self,value):
-
-                # Apply the speed change to both viewers
-               self.Channel1Viewer.changeSpeed(value)
-               self.Channel2Viewer.changeSpeed(value)
 
         def createSignalEditor(self):
                
@@ -511,7 +421,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(signalEditor.ID))
                signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(signalEditor.ID))
-               signalEditor.nonpolarButton.clicked.connect(lambda: self.show_polar_view(signal.x, signal.y, signal.name)) # From Nada
+               
                signalEditor.channel1Checkbox.setChecked(True)
                signalEditor.channel1Checkbox.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id, state))
                signalEditor.channel2Checkbox.stateChanged.connect(lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
@@ -570,16 +480,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         def rename(self,signalEditorId):
                 signal = None
                 entered_text = None
-                for signal in self.Channel1Viewer.signalsChannel:
-                      if signal.signalId == signalEditorId:
-                             signalEditor = self.signalEditingWindows[signal.signalId-1]
-                             entered_text = signalEditor.renameTextField.text()
-                             if entered_text.strip():
-                                signal.label = entered_text
-                                signalEditor.SignalLabel.setText(entered_text)
-                                signal.rename_signal(entered_text)
-                                break
-                for signal in self.Channel2Viewer.signalsChannel:
+                for signal in self.signals:
                       if signal.signalId == signalEditorId:
                              signalEditor = self.signalEditingWindows[signal.signalId-1]
                              entered_text = signalEditor.renameTextField.text()
@@ -602,70 +503,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 if color.isValid():
                         signal = None
                         # Apply the selected color to the signal
-                        for signal in self.Channel1Viewer.signalsChannel:
+                        for signal in self.signals:
                                if signal.signalId == signalEditorID:
                                       signal.color = color
                                       signal.change_color(color)
                                       break
-                        for signal in self.Channel2Viewer.signalsChannel:
-                               if signal.signalId == signalEditorID:
-                                      signal.color = color
-                                      signal.change_color(color)
-                                      break
-                               
-        # NADA'S ADDITION
-        def show_polar_view(self, timestamps, signal_values, signal_label):
-                signal_window = PolarWindow(timestamps, signal_values, signal_label)
-                signal_window.show()
-
-        def live_connection(self, status):
-                if status == "connect":
-                        self.fetch_subscriber_count.connected = True
-                        self.thread = threading.Thread(target=self.fetch_subscriber_count.fetch_data)
-                        self.thread.start()
-                else:
-                        self.fetch_subscriber_count.connected = False
-
-        def update_count(self):
-                # Change plot_widget_two to whatever it is called in the new UI
-
-                subscriber_count = self.fetch_subscriber_count.subscriber_count
-                elapsed_time = time.time() - self.start_time
-
-                self.timestamps.append(elapsed_time)
-                self.subscriber_counts.append(subscriber_count)
-
-                self.Channel1Viewer.plot_graph.clear()  # not sure if this is necessary
-                self.Channel1Viewer.plot_graph.plot(self.timestamps, self.subscriber_counts, pen=pg.mkPen(color='g', width=2),
-                                          symbol='o',
-                                          symbolBrush='w')
-
-                # Set axis labels
-                self.Channel1Viewer.plot_graph.setLabel('left', 'Subs Count')
-                self.Channel1Viewer.plot_graph.setLabel('bottom', 'Time (sec)')
-
-                # Set Y-axis range
-                # if self.subscriber_counts:
-                #         y_min = min(self.subscriber_counts) - 10
-                #         y_max = max(self.subscriber_counts) + 10
-                        # self.Channel1Viewer.plot_graph.setYRange(y_min, y_max)
-                        # self.Channel1Viewer.plot_graph.setXRange(0, max(self.timestamps) + 5)
-
-                # # Format x-axis to show time
-                # self.Channel1Viewer.plot_graph.getAxis('bottom').setTicks(
-                #         [[(t, time.strftime("%H:%M:%S", time.gmtime(t))) for t in self.timestamps]])
-                #
-                # # Format y-axis points
-                # self.Channel1Viewer.plot_graph.getAxis('left').setTicks(
-                #         [[(count, str(count)) for count in
-                #           range(int(y_min), int(y_max) + 1, 5)]])  # every 5 subscribers
-
-                # self.plot_widget_two.repaint() #I think this is useless
-
-        def export_to_pdf(self, signal_one_statistics, signal_two_statistics):
-                pdf = ExportToPdf(signal_one_statistics, signal_two_statistics)
-
-             
+                        
 
 
 if __name__ == "__main__":
