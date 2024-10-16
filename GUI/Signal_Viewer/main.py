@@ -273,7 +273,10 @@ class SignalCine(QtWidgets.QFrame):
 
         self.plot_graph.setXRange(new_x_range[0], new_x_range[1], padding=0)
         self.plot_graph.setYRange(new_y_range[0], new_y_range[1], padding=0)
-        
+
+
+
+
 
 
 
