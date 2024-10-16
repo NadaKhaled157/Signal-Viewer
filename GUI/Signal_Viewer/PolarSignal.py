@@ -31,7 +31,7 @@ class PolarWindow(QMainWindow):
 
         # Signal Drawing
         self.signal, = self.ax.plot([], [], 'r-')  # initialize signal
-        self.ani = animation.FuncAnimation(self.fig, self.update_plot, frames=2*len(self.time),
+        self.ani = animation.FuncAnimation(self.fig, self.update_plot, frames=5*len(self.time),
                                            interval=50, repeat=False)
         self.init_ui()
         self.init_plot()
@@ -39,7 +39,7 @@ class PolarWindow(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Signal in Polar View")
         self.setGeometry(0, 0, 1000, 1000)
-        window_icon = QIcon('images/polar_icon.png')
+        window_icon = QIcon('D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/nonpolar.png')
         self.setWindowIcon(window_icon)
 
         self.signal_label = QLabel(f'{self.signal_label}')  # GET SIGNAL LABEL FROM MAIN WINDOW
@@ -47,6 +47,7 @@ class PolarWindow(QMainWindow):
         label_font = QFont('Arial', 15)  # GET FONT USED IN MAIN WINDOW
         self.signal_label.setFont(label_font)
         self.signal_label.setFixedSize(500, 100)
+        self.signal_label.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(self.signal_label, alignment=Qt.AlignHCenter)
         self.center_window()
 

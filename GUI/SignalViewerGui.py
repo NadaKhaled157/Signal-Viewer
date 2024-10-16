@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import  QColorDialog
+from PyQt5.QtWidgets import  QColorDialog, QDialog, QComboBox
+from PyQt5 import QtGui
 from ChannelEditor import ChannelEditor
 from SignalEditWindow import SignalEditor
 from Signal_Viewer.main import *
@@ -8,6 +9,19 @@ from Signal_Viewer.ExportToPdf import ExportToPdf
 import time
 import threading
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
+from scipy.interpolate import interp1d
+import random
+import pyqtgraph as pg
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtCore, QtGui
+from pyqtgraph.Qt import QtCore, QtGui
+from PyQt5.QtGui import QPixmap, QPainter, QBrush, QPen, QColor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog, QVBoxLayout, QSlider, QCheckBox, QScrollBar, QVBoxLayout, QDialog, QComboBox, QLineEdit, QFrame
+import pandas as pd
+import sys
+from PyQt5.QtCore import Qt, QPoint, QRect
+import numpy as np
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 
 class GlueOptions(QDialog):
     def __init__(self, portionx1, portiony1, portionx2, portiony2,gluedSignals, main_window):
@@ -19,7 +33,9 @@ class GlueOptions(QDialog):
         self.portion_y2 = portiony2
         self.interpolation_order = "linear"
         self.gluedSignals = gluedSignals
-        self.setStyleSheet("background-color: #181818;")
+        app_icon = QtGui.QIcon("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/signal.png")
+        self.main_window.setWindowIcon(app_icon)
+        self.setStyleSheet("background-color: #2A2A2A;")
         self.setFixedSize(800, 600)
 
         # Main layout for the QDialog
@@ -51,7 +67,10 @@ class GlueOptions(QDialog):
         self.label_order = QLabel('Interpolation order:')
         self.combo_order = QComboBox(self)
         self.combo_order.addItems(['linear', 'cubic', 'quadratic'])
-        self.combo_order.setStyleSheet(" background-color: gray; ")
+        self.combo_order.setStyleSheet("""
+        background-color: white;
+        items-color: white;
+""")
         self.combo_order.setGeometry(40, 285, 110, 30)
 
         shift_buttons_layout.addWidget(self.label_order)
@@ -67,32 +86,58 @@ class GlueOptions(QDialog):
         shift_right_signal2_button.setFixedSize(100, 30)
         shift_right_signal2_button.setGeometry(680, 285, 300, 300)
         shift_right_signal2_button.clicked.connect(self.shiftRightSignal2)
-        shift_right_signal2_button.setStyleSheet("font-size: 20px; border-radius: 10px; background-color: white; ")
+        shift_right_signal2_button.setStyleSheet(
+            "background-color: rgb(24, 24, 24);\n"
+            "color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 15px;\n"
+            "font-weight:800;"
+        )
         shift_buttons_layout.addWidget(shift_right_signal2_button)
 
         shift_left_signal2_button = QPushButton("Shift Left", self)
         shift_left_signal2_button.setFixedSize(100, 30)
         shift_left_signal2_button.setGeometry(510, 285, 300, 300)
         shift_left_signal2_button.clicked.connect(self.shiftLeftSignal2)
-        shift_left_signal2_button.setStyleSheet("font-size: 20px; border-radius: 10px; background-color: white;")
+        shift_left_signal2_button.setStyleSheet(
+            "background-color: rgb(24, 24, 24);\n"
+            "color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 15px;\n"
+            "font-weight:800;"
+        )
         shift_buttons_layout.addWidget(shift_left_signal2_button)
 
         # Button to show the glued signal
         show_glued_signal_button = QPushButton("Show Glued Signal", self)
         show_glued_signal_button.setFixedSize(170, 40)
-        show_glued_signal_button.setGeometry(290, 550, 400, 400)
+        show_glued_signal_button.setGeometry(220, 550, 400, 400)
         show_glued_signal_button.clicked.connect(self.showGluedSignal)
-        show_glued_signal_button.setStyleSheet("font-size: 20px; border-radius: 10px; background-color: white;")
+        show_glued_signal_button.setStyleSheet(
+            "background-color: rgb(24, 24, 24);\n"
+            "color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 20px;\n"
+            "font-weight:800;"
+        )
         shift_buttons_layout.addWidget(show_glued_signal_button)
         show_report_button = QPushButton("Show report", self)
         show_report_button.setFixedSize(170, 40)
-        show_report_button.setGeometry(400, 550, 400, 400)
+        show_report_button.setGeometry(420, 550, 400, 400)
         show_report_button.clicked.connect(self.showReport)
+        show_report_button.setStyleSheet(
+            "background-color: rgb(24, 24, 24);\n"
+            "color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 20px;\n"
+            "font-weight:800;"
+        )
 
         # Input for shift amount
         self.shift_amount_input = QLineEdit(self)
         self.shift_amount_input.setPlaceholderText("1")
-        self.shift_amount_input.setStyleSheet("background-color: white;")
+        self.shift_amount_input.setStyleSheet("background-color: white; border-radius: 10px; \n")
+        self.shift_amount_input.setAlignment(QtCore.Qt.AlignCenter)
         self.shift_amount_input.setFixedSize(30, 30)
         self.shift_amount_input.setGeometry(630, 285, 400, 400)
         shift_buttons_layout.addWidget(self.shift_amount_input)
@@ -253,35 +298,51 @@ class MyMainWindow(QMainWindow):
         self.selected_rect = None
         self.captured_cnt = 0
         self.temp_rect = None
+        self.allow_drawing = False
         self.capture_button = QPushButton("capture", self)
         self.capture_button.clicked.connect(self.capture_rectangle)
         self.capture_button.hide()
+        self.capture_button.setStyleSheet(
+            "color: rgb(24, 24, 24);\n"
+            "background-color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 15px;\n"
+            "font-weight:800;"
+        )
 
         self.delete_button = QPushButton("delete", self)
         self.delete_button.clicked.connect(self.delete_rectangle)
+        self.delete_button.setStyleSheet(
+            "color: rgb(24, 24, 24);\n"
+            "background-color: rgb(255, 255, 255);\n"
+            "border: 1px;\n"
+            "border-radius: 15px;\n"
+            "font-weight:800;"
+        )
         self.delete_button.hide()
     def mousePressEvent(self, event):
-        click_on_rect = False
-        if event.buttons() & Qt.LeftButton:
-            clicked_point = event.pos()
-            for i, (rect_frame, captured) in enumerate(self.rectangles):
-                if rect_frame.geometry().contains(clicked_point):
-                    self.selected_rect = i
-                    click_on_rect = True
-                    self.show_buttons(clicked_point)
+        if self.allow_drawing:
+              click_on_rect = False
+              if event.buttons() & Qt.LeftButton:
+                    clicked_point = event.pos()
+                    for i, (rect_frame, captured) in enumerate(self.rectangles):
+                        if rect_frame.geometry().contains(clicked_point):
+                            self.selected_rect = i
+                            click_on_rect = True
+                            self.show_buttons(clicked_point)
 
-            if not click_on_rect:
-                self.begin = event.pos()
-                self.destination = self.begin
-                self.selected_rect = None
-                self.capture_button.hide()
-                self.delete_button.hide()
+                    if not click_on_rect:
+                        self.begin = event.pos()
+                        self.destination = self.begin
+                        self.selected_rect = None
+                        self.capture_button.hide()
+                        self.delete_button.hide()
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton and self.begin and self.captured_cnt < 2:
+        if event.buttons() & Qt.LeftButton and self.begin and self.captured_cnt < 2 and self.allow_drawing:
             self.destination = event.pos()
             self.update_temp_rectangle()
     def mouseReleaseEvent(self, event):
-        if event.button() & Qt.LeftButton and not self.selected_rect:
+        if event.button() & Qt.LeftButton and not self.selected_rect and self.allow_drawing:
             rect = QRect(self.begin, self.destination)
             if rect.width() > 10 and rect.height() > 10:
                 self.create_rectangle(rect)
@@ -342,6 +403,8 @@ class MyMainWindow(QMainWindow):
 
             self.captured_cnt += 1
             if self.captured_cnt == 1:
+                print("hena el begin wl end")
+                print(self.begin.x(), self.destination.x(),)
                 self.portion_x1, self.portion_y1 = self.get_intersection(self.begin.x(), self.destination.x(),
                                                                          current_viewer)
                 print(f" captured end{self.portion_x1[-1]}, begin {self.portion_x1[0]}")
@@ -375,6 +438,8 @@ class MyMainWindow(QMainWindow):
                 max_new_range_x_axis - min_new_range_x_axis) + min_new_range_x_axis
         mapped_x2_rect = ((x2Rectangle - min_old_range_window) / (max_old_range_window - min_old_range_window)) * (
                 max_new_range_x_axis - min_new_range_x_axis) + min_new_range_x_axis
+        
+        print(mapped_x1_rect, mapped_x2_rect)
 
         signal = current_viewer.signalsChannel[-1]  # we need to determine which signal we will take the glaw of it
         self.toBeGluedSignals.append(signal)
@@ -394,18 +459,20 @@ class MyMainWindow(QMainWindow):
 
 
     def glue_options(self):
+        self.allow_drawing = True
         print("Glue options method called in MyMainWindow")
-        if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(self, 'portion_y2'):
-            print("Portions are available")
-            glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,self.toBeGluedSignals, self)
-            glue_window.exec_()
+        if self.captured_cnt == 2:
+              if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(self, 'portion_y2'):
+                print("Portions are available")
+                glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,self.toBeGluedSignals, self)
+                glue_window.exec_()
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
         def setupUi(self, MainWindow):
 
                 #Window Setup
-                app_icon =  QtGui.QIcon('Deliverables/app icon.png')
+                app_icon =  QtGui.QIcon('D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/signal.png')
                 MainWindow.setWindowIcon(app_icon)
                 MainWindow.setObjectName("Signal Viewer")
                 MainWindow.setFixedSize(1379, 870)
@@ -566,7 +633,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "background-color:transparent;\n"
         "font-weight:800;")
                 icon5 = QtGui.QIcon()
-                icon5.addPixmap(QtGui.QPixmap("Deliverables/downloads.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon5.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/downloads.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.UploadButton.setIcon(icon5)
                 self.UploadButton.setIconSize(QtCore.QSize(20, 20))
                 self.UploadButton.setObjectName("UploadButton")
@@ -582,7 +649,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "font-weight:800;")
                 self.ConnectToWebsite.clicked.connect(lambda: self.live_connection('connect'))
                 icon6 = QtGui.QIcon()
-                icon6.addPixmap(QtGui.QPixmap("Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon6.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ConnectToWebsite.setIcon(icon6)
 
                 self.DisconnectFromWebsite = QtWidgets.QPushButton(self.TaskBar)
@@ -594,7 +661,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.DisconnectFromWebsite.clicked.connect(lambda: self.live_connection('connect'))
                 icon12 = QtGui.QIcon()
                 icon12.addPixmap(QtGui.QPixmap(
-                        "Deliverables/disconnect_icon.png"),
+                        "D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/disconnect_icon.png"),
                                 QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.DisconnectFromWebsite.setIcon(icon12)
                 #
@@ -610,7 +677,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                 # self.ExportButton.clicked.connect(lambda: self.export_to_pdf({"sig1":10}, {"sig2":12})) # add actual stats
                 icon7 = QtGui.QIcon()
-                icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon7.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ExportButton.setIcon(icon7)
                 self.ExportButton.setIconSize(QtCore.QSize(20, 20))
                 self.ExportButton.setObjectName("ExportButton")
@@ -632,7 +699,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 15px;")
                 self.PlayChannel1.setText("")
                 icon8 = QtGui.QIcon()
-                icon8.addPixmap(QtGui.QPixmap("Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon8.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.PlayChannel1.setIcon(icon8)
                 self.PlayChannel1.setIconSize(QtCore.QSize(25, 25))
                 self.PlayChannel1.setObjectName("PlayChannel1")
@@ -647,7 +714,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 15px;")
                 self.PauseChannel1.setText("")
                 icon9 = QtGui.QIcon()
-                icon9.addPixmap(QtGui.QPixmap("Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon9.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.PauseChannel1.setIcon(icon9)
                 self.PauseChannel1.setIconSize(QtCore.QSize(25, 25))
                 self.PauseChannel1.setObjectName("PauseChannel1")
@@ -675,7 +742,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 20px;\n"
         "font-weight:800;")
                 icon11 = QtGui.QIcon()
-                icon11.addPixmap(QtGui.QPixmap("Deliverables/signal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon11.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/signal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.glueButton.setIcon(icon11)
                 self.glueButton.setObjectName("GlueButton")
                 self.glueButton.clicked.connect(MainWindow.glue_options)
@@ -763,7 +830,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                                         "font-weight:800;")
                         # Change icon when toggled ON (if you have a different icon for this state)
                         iconOn = QtGui.QIcon()
-                        iconOn.addPixmap(QtGui.QPixmap("GUI/Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                        iconOn.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                         self.LinkChannels.setIcon(iconOn)
                         self.LinkChannels.setText("Unlink channels")
                         self.Channel1Viewer.rewindSignal()

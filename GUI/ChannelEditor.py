@@ -10,13 +10,13 @@ class ChannelEditor(QtWidgets.QFrame):
         _translate = QtCore.QCoreApplication.translate
 
         zoom_in_icon = QtGui.QIcon()
-        zoom_in_icon.addPixmap(QtGui.QPixmap("Deliverables\zoom-in (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        zoom_in_icon.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables\zoom-in (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         zoom_out_icon = QtGui.QIcon()
-        zoom_out_icon.addPixmap(QtGui.QPixmap("Deliverables\zoom-out (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        zoom_out_icon.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables\zoom-out (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         rewind_icon = QtGui.QIcon()
-        rewind_icon.addPixmap(QtGui.QPixmap("Deliverables/rewind.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        turtle_icon = QtGui.QPixmap("Deliverables/turtle (2).png")
-        rabbit_icon = QtGui.QPixmap("Deliverables/rabbit (2).png")
+        rewind_icon.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/rewind.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        turtle_icon = QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/turtle (2).png")
+        rabbit_icon = QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/rabbit (2).png")
 
         # Inner Window
         self.InnerWindow = QtWidgets.QFrame(self)

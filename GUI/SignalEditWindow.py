@@ -12,8 +12,7 @@ class SignalEditor(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Raised)
         _translate = QtCore.QCoreApplication.translate
 
-        rename_icon = QtGui.QIcon("Deliverables/rename.png")
-        color_icon = QtGui.QIcon("Deliverables/color-wheel.png")
+        color_icon = QtGui.QIcon("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables\color-wheel.png")
         
         # Inner window setup
         self.InnerSignalWindow = QtWidgets.QFrame(self)
@@ -81,7 +80,7 @@ class SignalEditor(QtWidgets.QFrame):
         "border-radius: 20px;\n"
         "font-weight:800;")
         icon12 = QtGui.QIcon()
-        icon12.addPixmap(QtGui.QPixmap("Deliverables/nonpolar.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon12.addPixmap(QtGui.QPixmap("D:/College/Third year/First Term/DSP/Tasks/Task 1/Signal-Viewer/GUI/Deliverables/nonpolar.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.nonpolarButton.setIcon(icon12)
         self.nonpolarButton.setObjectName("nonpolarButton")
         self.nonpolarButton.setText(_translate("MainWindow","Show in Polar"))
