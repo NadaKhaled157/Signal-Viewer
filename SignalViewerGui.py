@@ -522,17 +522,31 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                 #signal controls
                 self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
-                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 900))
+                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 800))
                 self.scrollArea.setWidgetResizable(True)  # Ensure the scroll area resizes automatically
                 self.scrollArea.setStyleSheet("background-color: rgb(42, 42, 42); border:0px;")
-                self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                scrollbar = QScrollBar()
+                scrollbar.setStyleSheet("""
+            QScrollBar:vertical {
+                border: 1px solid #999999;
+                background: #f9f9f9;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555555;
+                min-height: 20px;
+            }
+        """)
+                self.scrollArea.setVerticalScrollBar(scrollbar)
+                # self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
                 self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
                 self.scrollAreaWidgetContents = QtWidgets.QWidget()
                 self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
-                self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
                 self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+                self.scrollArea.setWidget(self.scrollAreaWidgetContents)
                 
                 
                 # self.Signal1EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 1")
@@ -900,6 +914,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                         signalEditor.setVisible(True)
                         self.scrollArea.update()
                         # self.scrollArea.adjustSize()
+                        # self.scrollAreaWidgetContents.updateGeometry()
+                        # self.scrollArea.updateGeometry()
+                        # self.scrollArea.verticalScrollBar().setValue(self.scrollArea.verticalScrollBar().maximum())
 
                signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(signalEditor.ID))
                signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(signalEditor.ID))
