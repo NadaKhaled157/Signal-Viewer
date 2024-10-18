@@ -899,7 +899,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                         self.signalEditingWindows.append(signalEditor)
                         signalEditor.setVisible(True)
                         self.scrollArea.update()
-                        self.scrollArea.adjustSize()
+                        # self.scrollArea.adjustSize()
 
                signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(signalEditor.ID))
                signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(signalEditor.ID))
