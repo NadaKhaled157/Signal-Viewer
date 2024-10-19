@@ -161,20 +161,17 @@ class GlueOptions(QDialog):
                 self.glued_y = np.concatenate([portion_y1, y_interp, portion_y2])
                 return self.glued_x, self.glued_y
             else:
-                intersection = list(set(portion_x1) & set(portion_x2))
-                x_list = portion_x1[:-len(intersection)] + portion_x2[len(intersection):]
-                y_list = portion_y1[:-len(intersection)] + portion_y2[len(intersection):]
-                x_interp = np.linspace(portion_x2[0] + 1e-6,
-                                       portion_x1[-1] - 1e-6)  # Make sure to use a consistent size
-                interp_y_func = interp1d(x_list, y_list, kind=order)
-                y_interp = interp_y_func(x_interp)
+                intersection, initial_index, final_index = self.x_interp(portion_x1, portion_x2)
+                interp_y_func1 = interp1d(portion_x1, portion_y1, kind=order)
+                interp_y_func2 = interp1d(portion_x2, portion_y2, kind=order)
+                y1_interp = interp_y_func1(intersection)
+                y2_interp = interp_y_func2(intersection)
+                y_interp = (y1_interp + y2_interp) / 2
 
                 self.glued_x = np.concatenate(
-                    [portion_x1[:-len(intersection)], x_interp, portion_x2[len(intersection):]])
+                    [portion_x1[:initial_index], intersection, portion_x2[final_index:]])
                 self.glued_y = np.concatenate(
-                    [portion_y1[:-len(intersection)], y_interp, portion_y2[len(intersection):]])
-
-                print(self.glued_x)
+                    [portion_y1[:initial_index], y_interp, portion_y2[final_index:]])
                 return self.glued_x, self.glued_y
 
         elif portion_x2[0] < portion_x1[0]:
@@ -191,21 +188,38 @@ class GlueOptions(QDialog):
                 self.glued_y = np.concatenate([portion_y2, y_interp, portion_y1])
                 return self.glued_x, self.glued_y
             else:
-                intersection = list(set(portion_x1) & set(portion_x2))
-                x_list = portion_x2[:-len(intersection)] + portion_x1[len(intersection):]
-                y_list = portion_y2[:-len(intersection)] + portion_y1[len(intersection):]
-                x_interp = np.linspace(portion_x1[0] + 1e-6,
-                                       portion_x2[-1] - 1e-6)  # Make sure to use a consistent size
-                interp_y_func = interp1d(x_list, y_list, kind=order)
-                y_interp = interp_y_func(x_interp)
+                intersection, initial_index, final_index = self.x_interp(portion_x2, portion_x1)
+                interp_y_func2 = interp1d(portion_x2, portion_y2, kind=order)
+                interp_y_func1 = interp1d(portion_x1, portion_y1, kind=order)
+                y1_interp = interp_y_func1(intersection)
+                y2_interp = interp_y_func2(intersection)
+                y_interp = (y1_interp + y2_interp) / 2
 
                 self.glued_x = np.concatenate(
-                    [portion_x1[:-len(intersection)], x_interp, portion_x2[len(intersection):]])
+                    [portion_x2[:initial_index], intersection, portion_x1[final_index:]])
                 self.glued_y = np.concatenate(
-                    [portion_y1[:-len(intersection)], y_interp, portion_y2[len(intersection):]])
-
-                print(self.glued_x)
+                    [portion_y2[:initial_index], y_interp, portion_y1[final_index:]])
                 return self.glued_x, self.glued_y
+
+    def x_interp(self, x, y):
+        intersection = set(x) & set(y)
+        print(intersection)
+        initial_index = 0
+        final_index = 0
+
+        for i, val in enumerate(x):
+            if val == min(intersection):
+                initial_index = i
+                break
+
+        for i, val in enumerate(y):
+            if val == max(intersection):
+                final_index = i
+                break
+
+        x_list = set(x[initial_index:] + y[:final_index])
+        return sorted(x_list), initial_index, final_index
+
     def showReport(self):
         signal1, signal2 = self.gluedSignals[0], self.gluedSignals[1]
         print("inside show report")
