@@ -269,6 +269,7 @@ class MyMainWindow(QMainWindow):
         self.selected_rect = None
         self.captured_cnt = 0
         self.temp_rect = None
+        self.allow_drawing = False
         self.capture_button = QPushButton("capture", self)
         self.capture_button.clicked.connect(self.capture_rectangle)
         self.capture_button.hide()
@@ -278,7 +279,7 @@ class MyMainWindow(QMainWindow):
         self.delete_button.hide()
     def mousePressEvent(self, event):
         click_on_rect = False
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & Qt.LeftButton and self.allow_drawing :
             clicked_point = event.pos()
             for i, (rect_frame, captured) in enumerate(self.rectangles):
                 if rect_frame.geometry().contains(clicked_point):
@@ -293,11 +294,11 @@ class MyMainWindow(QMainWindow):
                 self.capture_button.hide()
                 self.delete_button.hide()
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton and self.begin and self.captured_cnt < 2:
+        if event.buttons() & Qt.LeftButton and self.begin and self.captured_cnt < 2 and self.allow_drawing:
             self.destination = event.pos()
             self.update_temp_rectangle()
     def mouseReleaseEvent(self, event):
-        if event.button() & Qt.LeftButton and not self.selected_rect:
+        if event.button() & Qt.LeftButton and not self.selected_rect and self.allow_drawing:
             rect = QRect(self.begin, self.destination)
             if rect.width() > 10 and rect.height() > 10:
                 self.create_rectangle(rect)
@@ -367,9 +368,18 @@ class MyMainWindow(QMainWindow):
                                                                          current_viewer)
                 print(f" captured end{self.portion_x2[-1]}, begin {self.portion_x2[0]}")
 
+
+
             self.begin, self.destination = QPoint(), QPoint()
             self.capture_button.hide()
             self.delete_button.hide()
+            if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(
+                    self, 'portion_y2') and self.captured_cnt == 2:
+                print("Portions are available")
+                glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
+                                          self.toBeGluedSignals, self)
+                glue_window.exec_()
+
 
             self.update()
     def delete_rectangle(self):
@@ -410,11 +420,9 @@ class MyMainWindow(QMainWindow):
 
 
     def glue_options(self):
+        self.allow_drawing = True
         print("Glue options method called in MyMainWindow")
-        if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(self, 'portion_y2'):
-            print("Portions are available")
-            glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,self.toBeGluedSignals, self)
-            glue_window.exec_()
+
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
