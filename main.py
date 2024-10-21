@@ -194,18 +194,18 @@ class SignalCine(QtWidgets.QFrame):
         if not self.scrollBarVertical.underMouse():
             return
 
-        yMin, yMax = self.full_y_range
+        #yMin, yMax = self.full_y_range
+        yMin , yMax = self.plot_graph.getAxis('left').range
         total_range = yMax - yMin
-        view_range = total_range / 4  # Show 1/4 of the total range at a time
-
+        #view_range = total_range / 4  # Show 1/4 of the total range at a time
         # Invert the value calculation
         inverted_value = 100 - value
 
         # Calculate the new bottom of the view using the inverted value
-        bottom = yMin + (total_range - view_range) * (inverted_value / 100)
+        bottom = yMin + (total_range - 0) * (inverted_value / 100)
 
         # Set the new y-range
-        self.plot_graph.setYRange(bottom, bottom + view_range, padding=0)
+        self.plot_graph.setYRange(bottom, bottom + 0, padding=0)
     def open_file(self):
         filename = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
         path = filename[0]
