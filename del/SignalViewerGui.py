@@ -4,7 +4,7 @@ from SignalEditWindow import SignalEditor
 from main import *
 from PolarSignal import PolarWindow
 from LiveSignal import DataFetcher
-from ExportToPdf import ExportToPdf
+from ExportToPdf import ExportToPdf, save_image
 import time
 import threading
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QHBoxLayout
@@ -23,6 +23,7 @@ class GlueOptions(QDialog):
         self.glued_y = []
         self.setStyleSheet("background-color: #181818;")
         self.setFixedSize(800, 600)
+        self.glued_count = 0
 
         # Main layout for the QDialog
         self.main_glue_options_layout = QVBoxLayout(self)
@@ -86,10 +87,11 @@ class GlueOptions(QDialog):
         show_glued_signal_button.clicked.connect(self.showGluedSignal)
         show_glued_signal_button.setStyleSheet("font-size: 20px; border-radius: 10px; background-color: white;")
         shift_buttons_layout.addWidget(show_glued_signal_button)
-        show_report_button = QPushButton("Show report", self)
-        show_report_button.setFixedSize(170, 40)
-        show_report_button.setGeometry(400, 550, 400, 400)
-        show_report_button.clicked.connect(self.showReport)
+        save_glue_button = QPushButton("Save Signal", self)
+        save_glue_button.setFixedSize(170, 40)
+        save_glue_button.setGeometry(400, 550, 400, 400)
+        # save_glue_button.clicked.connect(lambda: save_image(self.plot_graph_glued_signal))
+        save_glue_button.clicked.connect(lambda: self.save_glue(self.plot_graph_glued_signal))
 
         # Input for shift amount
         self.shift_amount_input = QLineEdit(self)
@@ -206,12 +208,12 @@ class GlueOptions(QDialog):
 
                 print(self.glued_x)
                 return self.glued_x, self.glued_y
-    def showReport(self):
-        signal1, signal2 = self.gluedSignals[0], self.gluedSignals[1]
-        print("inside show report")
-        print(signal1.signalStatistics)
-        # self.main_window.ui.export_to_pdf(signal1.signalStatistics(), signal2.signalStatistics(), self.plot_graph_glued_signal)
-        pdf = ExportToPdf(signal1.signalStatistics(), signal2.signalStatistics(), self.glued_y, self.plot_graph_glued_signal)
+    def save_glue(self, glued_plot_image):
+        save_image(glued_plot_image)
+        self.glued_count = self.glued_count + 1
+        print("Glue Image Saved")
+
+
 
     def showGluedSignal(self):
         self.submit()
@@ -407,7 +409,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         def setupUi(self, MainWindow):
 
                 #Window Setup
-                app_icon =  QtGui.QIcon('Deliverables/app icon.png')
+                app_icon =  QtGui.QIcon('../Deliverables/app icon.png')
                 MainWindow.setWindowIcon(app_icon)
                 MainWindow.setObjectName("Signal Viewer")
                 MainWindow.setFixedSize(1379, 870)
@@ -522,17 +524,31 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                 #signal controls
                 self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
-                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 900))
+                self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 800))
                 self.scrollArea.setWidgetResizable(True)  # Ensure the scroll area resizes automatically
                 self.scrollArea.setStyleSheet("background-color: rgb(42, 42, 42); border:0px;")
-                self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                scrollbar = QScrollBar()
+                scrollbar.setStyleSheet("""
+            QScrollBar:vertical {
+                border: 1px solid #999999;
+                background: #f9f9f9;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555555;
+                min-height: 20px;
+            }
+        """)
+                self.scrollArea.setVerticalScrollBar(scrollbar)
+                self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
                 self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
                 self.scrollAreaWidgetContents = QtWidgets.QWidget()
                 self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
-                self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
                 self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+                self.scrollArea.setWidget(self.scrollAreaWidgetContents)
                 
                 
                 # self.Signal1EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 1")
@@ -568,7 +584,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "background-color:transparent;\n"
         "font-weight:800;")
                 icon5 = QtGui.QIcon()
-                icon5.addPixmap(QtGui.QPixmap("Deliverables/downloads.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon5.addPixmap(QtGui.QPixmap("../Deliverables/downloads.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.UploadButton.setIcon(icon5)
                 self.UploadButton.setIconSize(QtCore.QSize(20, 20))
                 self.UploadButton.setObjectName("UploadButton")
@@ -584,7 +600,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "font-weight:800;")
                 self.ConnectToWebsite.clicked.connect(lambda: self.live_connection('connect'))
                 icon6 = QtGui.QIcon()
-                icon6.addPixmap(QtGui.QPixmap("Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon6.addPixmap(QtGui.QPixmap("../Deliverables/world-wide-web.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ConnectToWebsite.setIcon(icon6)
 
                 self.DisconnectFromWebsite = QtWidgets.QPushButton(self.TaskBar)
@@ -596,7 +612,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.DisconnectFromWebsite.clicked.connect(lambda: self.live_connection('disconnect'))
                 icon12 = QtGui.QIcon()
                 icon12.addPixmap(QtGui.QPixmap(
-                        "Deliverables/disconnect_icon.png"),
+                    "../Deliverables/disconnect_icon.png"),
                                 QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.DisconnectFromWebsite.setIcon(icon12)
                 #
@@ -610,9 +626,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "background-color:transparent;\n"
         "font-weight:800;")
 
-                # self.ExportButton.clicked.connect(lambda: self.export_to_pdf({"sig1":10}, {"sig2":12})) # add actual stats
+                self.ExportButton.clicked.connect(lambda: self.save_report(GlueOptions.glue_window.gluedSignals[0],self.gluedSignals[1]),
+                                                  self.glued_count)
                 icon7 = QtGui.QIcon()
-                icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon7.addPixmap(QtGui.QPixmap("../Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ExportButton.setIcon(icon7)
                 self.ExportButton.setIconSize(QtCore.QSize(20, 20))
                 self.ExportButton.setObjectName("ExportButton")
@@ -634,7 +651,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 15px;")
                 self.PlayChannel1.setText("")
                 icon8 = QtGui.QIcon()
-                icon8.addPixmap(QtGui.QPixmap("Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon8.addPixmap(QtGui.QPixmap("../Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.PlayChannel1.setIcon(icon8)
                 self.PlayChannel1.setIconSize(QtCore.QSize(25, 25))
                 self.PlayChannel1.setObjectName("PlayChannel1")
@@ -649,7 +666,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 15px;")
                 self.PauseChannel1.setText("")
                 icon9 = QtGui.QIcon()
-                icon9.addPixmap(QtGui.QPixmap("Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon9.addPixmap(QtGui.QPixmap("../Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.PauseChannel1.setIcon(icon9)
                 self.PauseChannel1.setIconSize(QtCore.QSize(25, 25))
                 self.PauseChannel1.setObjectName("PauseChannel1")
@@ -677,7 +694,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "border-radius: 20px;\n"
         "font-weight:800;")
                 icon11 = QtGui.QIcon()
-                icon11.addPixmap(QtGui.QPixmap("Deliverables/signal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                icon11.addPixmap(QtGui.QPixmap("../Deliverables/glue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.glueButton.setIcon(icon11)
                 self.glueButton.setObjectName("GlueButton")
                 self.glueButton.clicked.connect(MainWindow.glue_options)
@@ -751,7 +768,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.DisconnectFromWebsite.setText(_translate("MainWindow", "Disconnect"))
                 self.ExportButton.setText(_translate("MainWindow", "Export to PDF"))
                 self.LinkChannels.setText(_translate("MainWindow", " Link channels"))
-                self.glueButton.setText(_translate("MainWindow","Glue Signals"))
+                self.glueButton.setText(_translate("MainWindow","Combine"))
                 
         def linkTwoChannels(self,checked):
                 self.isSyncEnabled = checked
@@ -765,7 +782,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                                         "font-weight:800;")
                         # Change icon when toggled ON (if you have a different icon for this state)
                         iconOn = QtGui.QIcon()
-                        iconOn.addPixmap(QtGui.QPixmap("Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                        iconOn.addPixmap(QtGui.QPixmap("../Deliverables/unlink.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                         self.LinkChannels.setIcon(iconOn)
                         self.LinkChannels.setText("Unlink channels")
                         self.Channel1Viewer.rewindSignal()
@@ -899,7 +916,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                         self.signalEditingWindows.append(signalEditor)
                         signalEditor.setVisible(True)
                         self.scrollArea.update()
-                        self.scrollArea.adjustSize()
+                        # self.scrollArea.adjustSize()
+                        # self.scrollAreaWidgetContents.updateGeometry()
+                        # self.scrollArea.updateGeometry()
+                        # self.scrollArea.verticalScrollBar().setValue(self.scrollArea.verticalScrollBar().maximum())
 
                signalEditor.ColorButton.clicked.connect(lambda : self.changeColor(signalEditor.ID))
                signalEditor.renameTextField.returnPressed.connect(lambda : self.rename(signalEditor.ID))
@@ -1056,6 +1076,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # def export_to_pdf(self, signal_one_statistics, signal_two_statistics, glued_plot):
         #         pdf = ExportToPdf(signal_one_statistics, signal_two_statistics, glued_plot)
+        def save_report(self, signal_one, signal_two):
+            print("Inside Export PDF")
+            signal1, signal2 = self.gluedSignals[0], self.gluedSignals[1]
+            pdf = ExportToPdf(signal1.signalStatistics(), signal2.signalStatistics(), self.glued_y,
+                              self.glued_count)
 
 
              

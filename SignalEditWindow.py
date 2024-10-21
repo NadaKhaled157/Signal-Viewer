@@ -91,5 +91,3 @@ class SignalEditor(QtWidgets.QFrame):
             return self.channel1Checkbox
         else:
             return self.channel1Checkbox
-    
-        

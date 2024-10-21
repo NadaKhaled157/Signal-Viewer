@@ -5,38 +5,52 @@ import pyqtgraph.exporters
 import numpy as np
 
 
+def save_image(glued_plot):
+    exporter = pg.exporters.ImageExporter(glued_plot.plotItem)
+    counter = 2
+    image_name = "glued_plot1.png"
+    while os.path.exists(f"Reports/Images/{image_name}"):
+        image_name = f"glued_plot{counter}.png"
+        counter = counter + 1
+    exporter.export(f"Reports/Images/{image_name}")
+
+    # self.image('Reports/Images/glued_plot.png', x=20, y=150, w=170, h=70)
+
+
 class ExportToPdf(FPDF):
-    def __init__(self, signal_one_statistics, signal_two_statistics, glued_signal_values, glued_plot):
+    def __init__(self, signal_one_statistics, signal_two_statistics, glued_signal_values, glued_images_count):
         super().__init__()
         self.add_page()
+        self.glued_images_count = glued_images_count
         glued_signal_values = np.array(glued_signal_values)
         # self.export_signal()
-        signal_one_stats = {
+        self.signal_one_stats = {
             "Mean": round(signal_one_statistics[0], 3),
             "Median": round(signal_one_statistics[1], 3),
             "STD": round(signal_one_statistics[2], 3),
             "MIN": round(signal_one_statistics[3], 3),
             "MAX": round(signal_one_statistics[4], 3)
         }
-        signal_two_stats = {
+        self.signal_two_stats = {
             "Mean": round(signal_two_statistics[0], 3),
             "Median": round(signal_two_statistics[1], 3),
             "STD": round(signal_two_statistics[2], 3),
             "MIN": round(signal_two_statistics[3], 3),
             "MAX": round(signal_two_statistics[4], 3)
         }
-        glued_signal_stats = {
+        self.glued_signal_stats = {
             "Mean": round(np.mean(glued_signal_values), 3),
             "Median": round(np.median(glued_signal_values), 3),
             "STD": round(np.std(glued_signal_values), 3),
             "MIN": round(np.min(glued_signal_values), 3),
             "MAX": round(np.max(glued_signal_values), 3)
         }
-        self.statistics_table(signal_one_stats, title="Signal One Statistics")
-        self.statistics_table(signal_two_stats, title="Signal Two Statistics")
-        self.statistics_table(glued_signal_stats, title="Glued Signal Statistics")
-        if len(glued_plot.listDataItems()) > 0:
-            self.add_image(glued_plot)
+        self.statistics_table(self.signal_one_stats, title="Signal One Statistics")
+        self.statistics_table(self.signal_two_stats, title="Signal Two Statistics")
+        self.statistics_table(self.glued_signal_stats, title="Glued Signal Statistics")
+        # if len(glued_plot.listDataItems()) > 0:
+        #     save_image(glued_plot)
+        self.add_images_to_pdf()
         self.save_pdf()
 
     def header(self):
@@ -86,15 +100,42 @@ class ExportToPdf(FPDF):
             self.cell(30, 10, str(value), 1, 0, 'C')
         self.ln(20)
 
-    def add_image(self, glued_plot):
-        exporter = pg.exporters.ImageExporter(glued_plot.plotItem)
-        exporter.export('Reports/Images/glued_plot.png')
-        self.image('Reports/Images/glued_plot.png', x=20, y=150, w=170, h=70)
+    def add_images_to_pdf(self):
+        images_directory = 'Reports/Images/'
+        all_images = os.listdir(images_directory)
+        # all_images.sort()
+        try:
+            all_images.sort(key=lambda x: int(x[10:-4]))  # starts sorting starting from the numbers till before .png
+        except Exception as e:
+            print(f"error parsing: {e}")
+        print(all_images)
+        latest_image_name = all_images[-1] if all_images else None
+        latest_image = latest_image_name.split('t')[1]
+        latest_image_number = int(latest_image.split('.')[0])
 
+        print(f"lastest_image_name: {latest_image_name}  ")
+        print(f"lastest_image: {latest_image}  ")
+        print(f"Last Image: {latest_image_number}")
+
+        i = 1
+        y_position = 150  # first image position
+        images_count = self.glued_images_count
+        # print(f"glued count: {self.glued_images_count}")
+        while self.glued_images_count > 0:
+            print("inside adding images while loop")
+            if y_position+70 > 270:
+                self.add_page()
+                y_position = 10
+            self.image(f'Reports/Images/glued_plot{latest_image_number - images_count + i}.png', x=20, y=y_position, w=170, h=70)
+            print(f'Reports/Images/glued_plot{latest_image_number - images_count + i}.png')
+            i = i + 1
+            y_position = y_position + 90
+            self.glued_images_count = self.glued_images_count - 1
+            print(f"glued count: {self.glued_images_count}")
 
     def save_pdf(self):
-        counter = 1
-        file_name = 'Signal Glue Report.pdf'
+        counter = 2
+        file_name = 'Signal Glue Report1.pdf'
         while os.path.exists(f"Reports/{file_name}"):
             file_name = f"Signal Glue Report{counter}.pdf"
             counter = counter+1
