@@ -307,6 +307,7 @@ class MyMainWindow(QMainWindow):
                 self.create_rectangle(rect)
                 self.selected_rect = len(self.rectangles) - 1
                 self.show_buttons(event.pos())
+                self.capture_rectangle()
                 print(f"Rectangle created from: {self.begin} to {self.destination}")  # Log rectangle coordinates
             self.update()
     def update_temp_rectangle(self):
@@ -330,10 +331,10 @@ class MyMainWindow(QMainWindow):
         self.rectangles.append((rect_frame, False))
     def show_buttons(self, pos):
         print("iam in the showwwww")
-        self.capture_button.move(pos + QPoint(15, 30))
-        self.capture_button.show()
-        self.capture_button.raise_()
-        self. delete_button.move(pos+ QPoint(130, 30))
+        # self.capture_button.move(pos + QPoint(15, 30))
+        # self.capture_button.show()
+        # self.capture_button.raise_()
+        self. delete_button.move(pos+ QPoint(15, 30))
         self.delete_button.show()
         self.delete_button.raise_()
 
@@ -392,6 +393,8 @@ class MyMainWindow(QMainWindow):
                 print("Portions are available")
                 glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
                                           self.toBeGluedSignals, self)
+                glue_window.finished.connect(self.delete_all_rectangles)
+
                 glue_window.exec_()
 
             self.update()
@@ -405,6 +408,15 @@ class MyMainWindow(QMainWindow):
             self.capture_button.hide()
             self.delete_button.hide()
             self.selected_rect = None
+
+    def delete_all_rectangles(self):
+        self.delete_rectangle()
+        for i, (_, _) in enumerate(self.rectangles):
+            rect_frame, captured = self.rectangles[i]
+            if captured:
+                self.captured_cnt -= 1
+            rect_frame.setParent(None)
+            del self.rectangles[i]
 
     def get_intersection(self, x1Rectangle, x2Rectangle, current_viewer):
         min_old_range_window, max_old_range_window = 0, self.ui.width()
