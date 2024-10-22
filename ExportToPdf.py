@@ -18,7 +18,7 @@ def save_image(glued_plot):
 
 
 class ExportToPdf(FPDF):
-    def __init__(self, signal_one_statistics, signal_two_statistics, glued_signal_values, glued_images_count):
+    def __init__(self, signal_one_statistics, signal_two_statistics, glued_signal_values, glued_signals_values, glued_images_count):
         super().__init__()
         self.add_page()
         self.glued_images_count = glued_images_count
@@ -50,7 +50,23 @@ class ExportToPdf(FPDF):
         self.statistics_table(self.glued_signal_stats, title="Glued Signal Statistics")
         # if len(glued_plot.listDataItems()) > 0:
         #     save_image(glued_plot)
-        self.add_images_to_pdf()
+        # self.add_images_to_pdf()
+        # self.save_pdf()
+        count = self.glued_images_count
+        i = 0
+        while(count > 0):
+            self.add_page()
+            self.glued_signal_stats = {
+                "Mean": round(glued_signals_values[i].mean(glued_signal_values), 3),
+                "Median": round(glued_signals_values[i].median(glued_signal_values), 3),
+                "STD": round(glued_signals_values[i].std(glued_signal_values), 3),
+                "MIN": round(glued_signals_values[i].min(glued_signal_values), 3),
+                "MAX": round(glued_signals_values[i].max(glued_signal_values), 3)
+            }
+            self.statistics_table(self.glued_signal_stats, title="Glued Signal Statistics")
+            i = i +1
+            count = count - 1
+        print(glued_signals_values)
         self.save_pdf()
 
     def header(self):

@@ -14,7 +14,7 @@ class MyMainWindow(QMainWindow):
         if hasattr(self.ui, 'glueButton'):
             print("Glue button exists")  # Add this line
             self.ui.glueButton.setEnabled(True)
-            self.ui.glueButton.clicked.connect(self.glue_options)
+            # self.ui.glueButton.clicked.connect(self.glue_options)
             print("Glue button connected")  # Add this line
         else:
             print("Glue button does not exist")  # Add this line
@@ -148,11 +148,11 @@ class MyMainWindow(QMainWindow):
             if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(
                     self, 'portion_y2') and self.captured_cnt == 2:
                 print("Portions are available")
-                glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
+                self.glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
                                           self.toBeGluedSignals, self)
-                glue_window.finished.connect(self.delete_all_rectangles)
+                self.glue_window.finished.connect(self.delete_all_rectangles)
 
-                glue_window.exec_()
+                self.glue_window.exec_()
 
             self.update()
     def delete_rectangle(self):
@@ -213,13 +213,9 @@ class MyMainWindow(QMainWindow):
         return portion_datax , portion_datay
 
     def glue_options(self):
-        print("Glue options method called in MyMainWindow")
-        if hasattr(self, 'portion_x1') and hasattr(self, 'portion_y1') and hasattr(self, 'portion_x2') and hasattr(self,
-                                                                                                                   'portion_y2'):
-            print("Portions are available")
-            self.glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
-                                           self.toBeGluedSignals, self)
-            self.glue_window.exec_()
+        self.allow_drawing = True
+
+
 
 if __name__ == "__main__":
 

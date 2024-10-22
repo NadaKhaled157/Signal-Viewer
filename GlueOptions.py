@@ -15,6 +15,7 @@ class GlueOptions(QDialog):
         self.interpolation_order = "linear"
         self.gluedSignals = gluedSignals
         self.glued_count = 0
+        self.glued_lists = np.array()
         self.glued_x = []
         self.glued_y = []
         self.setStyleSheet("background-color: #181818;")
@@ -233,6 +234,7 @@ class GlueOptions(QDialog):
         self.glued_y = self.glued_y[0: size]
         self.plot_graph_glued_signal.clear()
         self.plot_graph_glued_signal.plot(self.glued_x, self.glued_y, pen=pg.mkPen(color="green", width=2.5))
+        self.glued_lists.append(self.glued_y)
 
     def gap_or_overlap(self, range, begin, end):
         gap = False

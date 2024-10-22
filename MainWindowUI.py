@@ -224,7 +224,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.ExportButton.clicked.connect(
             lambda: self.save_report(MainWindow.toBeGluedSignals[0], MainWindow.toBeGluedSignals[1],
-            MainWindow.glue_window.glued_y, MainWindow.glue_window.glued_count))
+            MainWindow.glue_window.glued_y, MainWindow.glue_window.glued_lists, MainWindow.glue_window.glued_count))
         icon7 = QtGui.QIcon()
         icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ExportButton.setIcon(icon7)
@@ -490,25 +490,25 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         signalEditor.channel2Checkbox.stateChanged.connect(
             lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
 
-        def get_checked_signal_id(self, channelViewer):
-            signals_checked_id = []
-            channelnum = 0
-            if channelViewer == self.Channel1Viewer:
-                channelnum = 1
+    def get_checked_signal_id(self, channelViewer):
+        signals_checked_id = []
+        channelnum = 0
+        if channelViewer == self.Channel1Viewer:
+            channelnum = 1
+        else:
+            channelnum = 2
+        for signalEditor in self.signalEditingWindows :
+            if channelnum == 1 :
+                if signalEditor.channel1Checkbox.isChecked():
+                    signals_checked_id.append(signalEditor.ID)
             else:
-                channelnum = 2
-            for signalEditor in self.signalEditingWindows :
-                if channelnum == 1 :
-                    if signalEditor.channel1Checkbox.isChecked():
-                        signals_checked_id.append(signalEditor.ID)
-                else:
-                    if signalEditor.channel2Checkbox.isChecked():
-                        signals_checked_id.append(signalEditor.ID)
-            return signals_checked_id
-        def get_signal_by_id(self,id,channelViewer):
-            for signal in channelViewer.signalsChannel :
-                if signal.signalId == id:
-                    return signal
+                if signalEditor.channel2Checkbox.isChecked():
+                    signals_checked_id.append(signalEditor.ID)
+        return signals_checked_id
+    def get_signal_by_id(self,id,channelViewer):
+        for signal in channelViewer.signalsChannel :
+            if signal.signalId == id:
+                return signal
 
     def selectChannel1StateChanged(self, id, state):
         if state == Qt.Unchecked:  # ch 1 is unchecked
@@ -656,8 +656,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     # def export_to_pdf(self, signal_one_statistics, signal_two_statistics, glued_plot):
     #         pdf = ExportToPdf(signal_one_statistics, signal_two_statistics, glued_plot)
-    def save_report(self, signal_one, signal_two, glued_signal_values, glued_count):
+    def save_report(self, signal_one, signal_two, glued_signal_values, glued_lists, glued_count):
         print("Inside Save Report")
         # signal1, signal2 = self.gluedSignals[0], self.gluedSignals[1]
-        pdf = ExportToPdf(signal_one.signalStatistics(), signal_two.signalStatistics(), glued_signal_values,
+        pdf = ExportToPdf(signal_one.signalStatistics(), signal_two.signalStatistics(), glued_signal_values, glued_lists,
                           glued_count)
