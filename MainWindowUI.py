@@ -490,6 +490,26 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         signalEditor.channel2Checkbox.stateChanged.connect(
             lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
 
+        def get_checked_signal_id(self, channelViewer):
+            signals_checked_id = []
+            channelnum = 0
+            if channelViewer == self.Channel1Viewer:
+                channelnum = 1
+            else:
+                channelnum = 2
+            for signalEditor in self.signalEditingWindows :
+                if channelnum == 1 :
+                    if signalEditor.channel1Checkbox.isChecked():
+                        signals_checked_id.append(signalEditor.ID)
+                else:
+                    if signalEditor.channel2Checkbox.isChecked():
+                        signals_checked_id.append(signalEditor.ID)
+            return signals_checked_id
+        def get_signal_by_id(self,id,channelViewer):
+            for signal in channelViewer.signalsChannel :
+                if signal.signalId == id:
+                    return signal
+
     def selectChannel1StateChanged(self, id, state):
         if state == Qt.Unchecked:  # ch 1 is unchecked
             for signal in self.Channel1Viewer.signalsChannel:

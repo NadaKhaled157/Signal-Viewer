@@ -4,7 +4,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5 import QtCore, QtGui
 from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtGui import QPixmap, QPainter, QBrush, QPen, QColor
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog, QVBoxLayout, QSlider, QCheckBox, QScrollBar, QVBoxLayout, QDialog, QComboBox, QLineEdit, QFrame
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog, \
+    QVBoxLayout, QSlider, QCheckBox, QScrollBar, QVBoxLayout, QDialog, QComboBox, QLineEdit, QFrame
 import pandas as pd
 import sys
 from PyQt5.QtCore import Qt, QPoint, QRect
@@ -12,8 +13,10 @@ import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from scipy.interpolate import interp1d
 from scipy import stats
+
+
 class SignalObject:
-    def __init__(self, x_data, y_data, plot_widget, color, name,signalId):
+    def __init__(self, x_data, y_data, plot_widget, color, name, signalId):
         self.name = name
 
         # line will be plotted
@@ -27,10 +30,9 @@ class SignalObject:
         self.time = []
         self.magnitude = []
         self.showSignal = True
-        
-        # line will be plotted
-        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name = self.name)
 
+        # line will be plotted
+        self.line = self.plot_widget.plot([], [], pen=pg.mkPen(color=self.color, width=2.5), name=self.name)
 
     def update(self):
         if self.index < len(self.x):
@@ -43,28 +45,32 @@ class SignalObject:
                     self.plot_widget.setXRange(self.time[-400], self.time[-1])
                 else:
                     self.plot_widget.setXRange(self.x[0], self.x[399])
+
     def scrollSignalHorizontal(self, value):
         start = value
-        end = min(start+400, len(self.x)-1)
+        end = min(start + 400, len(self.x) - 1)
         self.plot_widget.setXRange(self.x[start], self.x[end])
-    def rename_signal(self,name):
+
+    def rename_signal(self, name):
         self.name = name
         self.line.clear()
         self.plot_widget.legend.removeItem(self.line)
-        self.line = self.plot_widget.plot(self.time, self.magnitude,pen=pg.mkPen(color=self.color, width=2.5), name=name)
+        self.line = self.plot_widget.plot(self.time, self.magnitude, pen=pg.mkPen(color=self.color, width=2.5),
+                                          name=name)
+
     def change_color(self, color):
 
         self.color = color
         self.line.clear()
         self.plot_widget.legend.removeItem(self.line)
-        self.line = self.plot_widget.plot(self.time, self.magnitude,pen=pg.mkPen(color=color, width=2.5), name=self.name)
+        self.line = self.plot_widget.plot(self.time, self.magnitude, pen=pg.mkPen(color=color, width=2.5),
+                                          name=self.name)
 
-
-            # scroll if more than 400 points are plotted
-            # if len(self.time) > 400:
-            #     self.plot_widget.setXRange(self.time[-400], self.time[-1])
-            # else:
-            #     self.plot_widget.setXRange(self.x[0], self.x[399])
+        # scroll if more than 400 points are plotted
+        # if len(self.time) > 400:
+        #     self.plot_widget.setXRange(self.time[-400], self.time[-1])
+        # else:
+        #     self.plot_widget.setXRange(self.x[0], self.x[399])
 
     def signalStatistics(self):
         mean_value = np.mean(self.y)
@@ -74,12 +80,13 @@ class SignalObject:
         max_value = np.max(self.y)
 
         duration = self.x[-1] - self.x[0]
-        return [mean_value, median_value,  std_value, min_value, max_value,  duration]
+        return [mean_value, median_value, std_value, min_value, max_value, duration]
+
 
 class SignalCine(QtWidgets.QFrame):
     def __init__(self, parent, x, y, width, height, scrollBarHorizontal, scrollBarVertical):
         super().__init__(parent)
-        
+
         # Set geometry and layout
         self.setGeometry(QtCore.QRect(x, y, width, height))
         self.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -106,7 +113,7 @@ class SignalCine(QtWidgets.QFrame):
         self.previous_scroll_value_vertical = 0
         self.previous_x_range = self.plot_graph.getAxis('bottom').range
         self.previous_y_range = self.plot_graph.getAxis('left').range
-    # scroll bars
+        # scroll bars
         self.scrollBarHorizontal = scrollBarHorizontal
         self.scrollBarHorizontal.setValue(0)  # Set the initial value
         self.scrollBarVertical = scrollBarVertical
@@ -119,8 +126,9 @@ class SignalCine(QtWidgets.QFrame):
         self.timer = QtCore.QTimer()
         self.timer.setInterval(self.defaultSpeed)
         self.timer.timeout.connect(self.updateSignals)
+
     def updateSignals(self):
-        if self.scrollBarHorizontal.underMouse() == False and self.scrollBarVertical.underMouse()==False:
+        if self.scrollBarHorizontal.underMouse() == False and self.scrollBarVertical.underMouse() == False:
             self.detectRangeChange()
         for signal in self.signalsChannel:
             signal.update()
@@ -157,8 +165,9 @@ class SignalCine(QtWidgets.QFrame):
             print("x data:", x)
             print("y data:", y)
             return signal
+
     def detectRangeChange(self):
-      #  print("iam here")
+        #  print("iam here")
         x_range = self.plot_graph.getAxis('bottom').range
         y_range = self.plot_graph.getAxis('left').range
         if x_range != self.previous_x_range:
@@ -170,7 +179,6 @@ class SignalCine(QtWidgets.QFrame):
             # print(self.scrollBarHorizontal.value())
 
         if y_range != self.previous_y_range:
-
             signal = self.signalsChannel[-1]
             y_range_size = max(signal.y) - min(signal.y)
             y_min, y_max = min(signal.y), max(signal.y)
@@ -189,23 +197,23 @@ class SignalCine(QtWidgets.QFrame):
         for signal in self.signalsChannel:
             signal.scrollSignalHorizontal(value)
 
-
     def scrollSignalVertical(self, value):
         if not self.scrollBarVertical.underMouse():
             return
 
-        yMin, yMax = self.full_y_range
+        # yMin, yMax = self.full_y_range
+        yMin, yMax = self.plot_graph.getAxis('left').range
         total_range = yMax - yMin
-        view_range = total_range / 4  # Show 1/4 of the total range at a time
-
+        # view_range = total_range / 4  # Show 1/4 of the total range at a time
         # Invert the value calculation
         inverted_value = 100 - value
 
         # Calculate the new bottom of the view using the inverted value
-        bottom = yMin + (total_range - view_range) * (inverted_value / 100)
+        bottom = yMin + (total_range - 0) * (inverted_value / 100)
 
         # Set the new y-range
-        self.plot_graph.setYRange(bottom, bottom + view_range, padding=0)
+        self.plot_graph.setYRange(bottom, bottom + 0, padding=0)
+
     def open_file(self):
         filename = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
         path = filename[0]
@@ -218,6 +226,7 @@ class SignalCine(QtWidgets.QFrame):
         else:
             print("No file selected")
             return None, None
+
     def rewindSignal(self):
         self.timer.start()
         for signal in self.signalsChannel:
@@ -226,41 +235,44 @@ class SignalCine(QtWidgets.QFrame):
             signal.magnitude = []
             signal.line.setData([], [])
         return
+
     def playSignal(self):
         self.timer.start()
         return
+
     def pauseSignal(self):
         self.timer.stop()
         return
+
     def changeSpeed(self, value):
-        self.defaultSpeed = 50-value
+        self.defaultSpeed = 50 - value
         self.timer.setInterval(self.defaultSpeed)
         print(self.defaultSpeed)
         return
-    def zoom(self,zoomIn=True):
+
+    def zoom(self, zoomIn=True):
         # Get the current view range
         x_range, y_range = self.plot_graph.viewRange()
 
-        self.min_x_range = 0.1  
-        self.max_x_range = 10   
-        self.min_y_range = 0.1  
-        self.max_y_range = 50   
+        self.min_x_range = 0.1
+        self.max_x_range = 10
+        self.min_y_range = 0.1
+        self.max_y_range = 50
 
-        
         x_center = (x_range[0] + x_range[1]) / 2
         y_center = (y_range[0] + y_range[1]) / 2
-        zoom_factor = 0.8  
-        
+        zoom_factor = 0.8
+
         if zoomIn:
             new_x_range = [(x_center - (x_center - x_range[0]) * zoom_factor),
-                        (x_center + (x_range[1] - x_center) * zoom_factor)]
+                           (x_center + (x_range[1] - x_center) * zoom_factor)]
             new_y_range = [(y_center - (y_center - y_range[0]) * zoom_factor),
-                        (y_center + (y_range[1] - y_center) * zoom_factor)]
+                           (y_center + (y_range[1] - y_center) * zoom_factor)]
         else:
             new_x_range = [(x_center - (x_center - x_range[0]) / zoom_factor),
-                        (x_center + (x_range[1] - x_center) / zoom_factor)]
+                           (x_center + (x_range[1] - x_center) / zoom_factor)]
             new_y_range = [(y_center - (y_center - y_range[0]) / zoom_factor),
-                        (y_center + (y_range[1] - y_center) / zoom_factor)]
+                           (y_center + (y_range[1] - y_center) / zoom_factor)]
 
         new_x_span = new_x_range[1] - new_x_range[0]
         new_y_span = new_y_range[1] - new_y_range[0]
@@ -268,25 +280,19 @@ class SignalCine(QtWidgets.QFrame):
         # Apply limits to x-axis
         if new_x_span < self.min_x_range:
             new_x_range = [x_center - self.min_x_range / 2, x_center + self.min_x_range / 2]
-            
+
         elif new_x_span > self.max_x_range:
             new_x_range = [x_center - self.max_x_range / 2, x_center + self.max_x_range / 2]
 
         # Apply limits to y-axis
         if new_y_span < self.min_y_range:
             new_y_range = [y_center - self.min_y_range / 2, y_center + self.min_y_range / 2]
-            
+
         elif new_y_span > self.max_y_range:
             new_y_range = [y_center - self.max_y_range / 2, y_center + self.max_y_range / 2]
 
         self.plot_graph.setXRange(new_x_range[0], new_x_range[1], padding=0)
         self.plot_graph.setYRange(new_y_range[0], new_y_range[1], padding=0)
-
-
-
-
-
-
 
 
 # Start the application
