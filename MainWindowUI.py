@@ -240,34 +240,23 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # Channel 1 controls
         self.PlayChannel1 = QtWidgets.QPushButton(self.centralwidget)
-        self.PlayChannel1.setGeometry(QtCore.QRect(300, 400, 31, 31))
+        self.PlayChannel1.setGeometry(QtCore.QRect(320, 400, 35, 35))
         self.PlayChannel1.setStyleSheet("color: rgb(255, 255, 255);\n"
                                         "font-size: 15px;\n"
                                         "background-color:rgb(24,24,24);\n"
                                         "font-weight:800;\n"
-                                        "border-radius: 15px;")
+                                        "border-radius: 15px;\n")
         self.PlayChannel1.setText("")
-        icon8 = QtGui.QIcon()
-        icon8.addPixmap(QtGui.QPixmap("Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.PlayChannel1.setIcon(icon8)
-        self.PlayChannel1.setIconSize(QtCore.QSize(25, 25))
+        self.iconplay = QtGui.QIcon()
+        self.iconplay.addPixmap(QtGui.QPixmap("Deliverables/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.iconpause = QtGui.QIcon()
+        self.iconpause.addPixmap(QtGui.QPixmap("Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.PlayChannel1.setIcon(self.iconplay)
+        self.PlayChannel1.setCheckable(True)
+        self.PlayChannel1.setIconSize(QtCore.QSize(35, 35))
         self.PlayChannel1.setObjectName("PlayChannel1")
-        self.PlayChannel1.clicked.connect(self.Channel1Viewer.playSignal)
+        self.PlayChannel1.toggled.connect(lambda checked: self.togglePlaySignal(checked, "channel 1"))
 
-        self.PauseChannel1 = QtWidgets.QPushButton(self.centralwidget)
-        self.PauseChannel1.setGeometry(QtCore.QRect(340, 400, 31, 31))
-        self.PauseChannel1.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                         "font-size: 15px;\n"
-                                         "background-color:rgb(24,24,24);\n"
-                                         "font-weight:800;\n"
-                                         "border-radius: 15px;")
-        self.PauseChannel1.setText("")
-        icon9 = QtGui.QIcon()
-        icon9.addPixmap(QtGui.QPixmap("Deliverables/video-pause-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.PauseChannel1.setIcon(icon9)
-        self.PauseChannel1.setIconSize(QtCore.QSize(25, 25))
-        self.PauseChannel1.setObjectName("PauseChannel1")
-        self.PauseChannel1.clicked.connect(self.Channel1Viewer.pauseSignal)
 
         self.LinkChannels = QtWidgets.QPushButton(self.centralwidget)
         self.LinkChannels.setGeometry(QtCore.QRect(1080, 425, 141, 41))
@@ -298,31 +287,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.glueButton.setObjectName("GlueButton")
         self.glueButton.clicked.connect(MainWindow.glue_options)
 
-        self.PauseChannel2 = QtWidgets.QPushButton(self.centralwidget)
-        self.PauseChannel2.setGeometry(QtCore.QRect(340, 800, 31, 31))
-        self.PauseChannel2.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                         "font-size: 15px;\n"
-                                         "background-color:rgb(24,24,24);\n"
-                                         "font-weight:800;\n"
-                                         "border-radius: 15px;")
-        self.PauseChannel2.setText("")
-        self.PauseChannel2.setIcon(icon9)
-        self.PauseChannel2.setIconSize(QtCore.QSize(25, 25))
-        self.PauseChannel2.setObjectName("PauseChannel2")
-        self.PauseChannel2.clicked.connect(self.Channel2Viewer.pauseSignal)
 
         self.PlayChannel2 = QtWidgets.QPushButton(self.centralwidget)
-        self.PlayChannel2.setGeometry(QtCore.QRect(300, 800, 31, 31))
+        self.PlayChannel2.setGeometry(QtCore.QRect(320, 800, 35, 35))
         self.PlayChannel2.setStyleSheet("color: rgb(255, 255, 255);\n"
                                         "font-size: 15px;\n"
                                         "background-color:rgb(24,24,24);\n"
                                         "font-weight:800;\n"
                                         "border-radius: 15px;")
         self.PlayChannel2.setText("")
-        self.PlayChannel2.setIcon(icon8)
-        self.PlayChannel2.setIconSize(QtCore.QSize(25, 25))
+        self.PlayChannel2.setIcon(self.iconplay)
+        self.PlayChannel2.setIconSize(QtCore.QSize(35, 35))
+        self.PlayChannel2.setCheckable(True)
         self.PlayChannel2.setObjectName("PlayChannel2")
-        self.PlayChannel2.clicked.connect(self.Channel2Viewer.playSignal)
+        self.PlayChannel2.toggled.connect(lambda checked: self.togglePlaySignal(checked,"channel 2"))
 
         self.Channel1Viewer.raise_()
         self.Channel1Editor.raise_()
@@ -330,13 +308,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.TaskBar.raise_()
         self.Separator.raise_()
         self.PlayChannel1.raise_()
-        self.PauseChannel1.raise_()
         self.horizontalSliderChannel1.raise_()
         self.verticalSliderChannel1.raise_()
         self.LinkChannels.raise_()
         self.verticalSliderChannel2.raise_()
         self.horizontalSliderChannel2.raise_()
-        self.PauseChannel2.raise_()
         self.PlayChannel2.raise_()
         self.Channel2Editor.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
@@ -369,8 +345,42 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.LinkChannels.setText(_translate("MainWindow", " Link channels"))
         self.glueButton.setText(_translate("MainWindow", "Combine"))
 
+    def togglePlaySignal(self, checked, channel):
+
+        if channel == "channel 1":
+            if checked:
+                self.PlayChannel1.setIcon(self.iconplay)
+                self.Channel1Viewer.pauseSignal()
+            else:
+                self.PlayChannel1.setIcon(self.iconpause)
+                self.Channel1Viewer.playSignal()
+
+        elif channel == "channel 2":
+            if checked:
+                self.PlayChannel2.setIcon(self.iconplay)
+                self.Channel2Viewer.pauseSignal()
+            else:
+                self.PlayChannel2.setIcon(self.iconpause)
+                self.Channel2Viewer.playSignal()
+
+        else:
+            if checked:
+                self.PlayChannel1.setIcon(self.iconplay)
+                self.PlayChannel2.setIcon(self.iconplay)
+                self.Channel1Viewer.pauseSignal()
+                self.Channel2Viewer.pauseSignal()
+            else:
+                self.PlayChannel1.setIcon(self.iconpause)
+                self.PlayChannel2.setIcon(self.iconpause)
+                self.Channel1Viewer.playSignal()
+                self.Channel2Viewer.playSignal()
+
+
+
     def linkTwoChannels(self, checked):
         self.isSyncEnabled = checked
+        self.PlayChannel1.setIcon(self.iconpause)
+        self.PlayChannel2.setIcon(self.iconpause)
         if checked:
             # Button is toggled ON
             self.LinkChannels.setStyleSheet("background-color: green;\n"
@@ -390,7 +400,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             # Try disconnecting signals safely
             try:
-
+                self.PlayChannel1.toggled.disconnect()
+                self.PlayChannel2.toggled.disconnect()
                 self.Channel1Editor.RewindButton.clicked.disconnect()
                 self.Channel2Editor.RewindButton.clicked.disconnect()
                 self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
@@ -399,6 +410,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 print("Some signals were not connected before disconnecting")
 
             # Connect synchronized signals
+            self.PlayChannel1.toggled.connect(lambda checked: self.togglePlaySignal(checked,"both"))
+            self.PlayChannel2.toggled.connect(lambda checked: self.togglePlaySignal(checked,"both"))
             self.Channel1Editor.RewindButton.clicked.connect(self.wrappedRewind)
             self.Channel2Editor.RewindButton.clicked.connect(self.wrappedRewind)
             self.Channel1Editor.SpeedSlider.valueChanged.connect(self.syncSliders)
@@ -417,12 +430,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.Channel1Viewer.rewindSignal()
             self.Channel2Viewer.rewindSignal()
 
-            self.Channel1Viewer.plot_graph.setXLink(self.Channel2Viewer.plot_graph)
-            self.Channel1Viewer.plot_graph.setYLink(self.Channel2Viewer.plot_graph)
+            self.Channel1Viewer.plot_graph.setXLink(None)
+            self.Channel1Viewer.plot_graph.setYLink(None)
 
             # Try disconnecting signals safely
             try:
-
+                self.PlayChannel1.toggled.disconnect()
+                self.PlayChannel2.toggled.disconnect()
                 self.Channel1Editor.RewindButton.clicked.disconnect()
                 self.Channel2Editor.RewindButton.clicked.disconnect()
                 self.Channel1Editor.SpeedSlider.valueChanged.disconnect()
@@ -435,6 +449,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             self.Channel1Editor.SpeedSlider.valueChanged.connect(self.Channel1Viewer.changeSpeed)
             self.Channel2Editor.SpeedSlider.valueChanged.connect(self.Channel2Viewer.changeSpeed)
+
+            self.PlayChannel1.toggled.connect(lambda checked: self.togglePlaySignal(checked,"channel 1"))
+            self.PlayChannel2.toggled.connect(lambda checked: self.togglePlaySignal(checked,"channel 2"))
 
     def wrappedRewind(self):
         self.Channel1Viewer.rewindSignal()
@@ -474,6 +491,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.verticalLayout.addWidget(signalEditor)
             self.signalEditingWindows.append(signalEditor)
             signalEditor.setVisible(True)
+            self.PlayChannel1.setIcon(self.iconpause)
             self.scrollArea.update()
             # self.scrollArea.adjustSize()
             # self.scrollAreaWidgetContents.updateGeometry()
@@ -511,13 +529,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 return signal
 
     def selectChannel1StateChanged(self, id, state):
+        
+        
         if state == Qt.Unchecked:  # ch 1 is unchecked
             for signal in self.Channel1Viewer.signalsChannel:
+                self.PlayChannel1.setIcon(self.iconplay)
                 if signal.signalId == id:
                     self.Channel1Viewer.plot_graph.removeItem(signal.line)  # remove from ch 1
                     signal.showSignal = False
                     break
         elif state == Qt.Checked:  # ch 1 is checked
+            self.PlayChannel1.setIcon(self.iconpause)
             for signal in self.Channel1Viewer.signalsChannel:
                 if signal.signalId == id and signal.line not in self.Channel1Viewer.plot_graph.listDataItems():
                     signal.line.setData(signal.time, signal.magnitude)  # reshow the signal
@@ -526,8 +548,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     break
 
     def selectChannel2StateChanged(self, id, state):
+        
+        
         signalRelated2Id = None
         if state == Qt.Checked:  # ch 2 is checked
+            self.PlayChannel2.setIcon(self.iconpause)
             for signal in self.Channel2Viewer.signalsChannel:
                 if signal.signalId == id and signal.line not in self.Channel2Viewer.plot_graph.listDataItems():  # then it was existed so we need to reshoe
                     signal.line.setData(signal.time, signal.magnitude)  # reshow the signal in Plot
@@ -553,6 +578,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.Channel2Viewer.playSignal()
 
         else:  # ch2 2 is unchecked
+            self.PlayChannel2.setIcon(self.iconplay)
             for signal in self.Channel2Viewer.signalsChannel:
                 if signal.signalId == id:
                     self.Channel2Viewer.plot_graph.removeItem(signal.line)  # remove from ch 2

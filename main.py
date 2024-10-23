@@ -251,48 +251,35 @@ class SignalCine(QtWidgets.QFrame):
         return
 
     def zoom(self, zoomIn=True):
-        # Get the current view range
-        x_range, y_range = self.plot_graph.viewRange()
+        
+        # Get the ViewBox of the plot widget
+        view_box = self.plot_graph.getViewBox()
 
-        self.min_x_range = 0.1
-        self.max_x_range = 10
-        self.min_y_range = 0.1
-        self.max_y_range = 50
+        # Get the current range for both axes
+        x_range, y_range = view_box.viewRange()
 
+        # Factor for zooming: use 0.8 for zoom in, and 1.25 for zoom out
+        zoom_factor = 0.8 if zoomIn else 1.25
+
+        # Calculate the center of the current range
         x_center = (x_range[0] + x_range[1]) / 2
         y_center = (y_range[0] + y_range[1]) / 2
-        zoom_factor = 0.8
 
-        if zoomIn:
-            new_x_range = [(x_center - (x_center - x_range[0]) * zoom_factor),
-                           (x_center + (x_range[1] - x_center) * zoom_factor)]
-            new_y_range = [(y_center - (y_center - y_range[0]) * zoom_factor),
-                           (y_center + (y_range[1] - y_center) * zoom_factor)]
-        else:
-            new_x_range = [(x_center - (x_center - x_range[0]) / zoom_factor),
-                           (x_center + (x_range[1] - x_center) / zoom_factor)]
-            new_y_range = [(y_center - (y_center - y_range[0]) / zoom_factor),
-                           (y_center + (y_range[1] - y_center) / zoom_factor)]
+        # Calculate the new range for x-axis and y-axis, keeping the same zoom factor for both
+        new_x_range = [
+            x_center - (x_center - x_range[0]) * zoom_factor,
+            x_center + (x_range[1] - x_center) * zoom_factor
+        ]
+        new_y_range = [
+            y_center - (y_center - y_range[0]) * zoom_factor,
+            y_center + (y_range[1] - y_center) * zoom_factor
+        ]
 
-        new_x_span = new_x_range[1] - new_x_range[0]
-        new_y_span = new_y_range[1] - new_y_range[0]
+        # Set the new range for both x and y axes
+        view_box.setRange(xRange=new_x_range, yRange=new_y_range)
 
-        # Apply limits to x-axis
-        if new_x_span < self.min_x_range:
-            new_x_range = [x_center - self.min_x_range / 2, x_center + self.min_x_range / 2]
 
-        elif new_x_span > self.max_x_range:
-            new_x_range = [x_center - self.max_x_range / 2, x_center + self.max_x_range / 2]
 
-        # Apply limits to y-axis
-        if new_y_span < self.min_y_range:
-            new_y_range = [y_center - self.min_y_range / 2, y_center + self.min_y_range / 2]
-
-        elif new_y_span > self.max_y_range:
-            new_y_range = [y_center - self.max_y_range / 2, y_center + self.max_y_range / 2]
-
-        self.plot_graph.setXRange(new_x_range[0], new_x_range[1], padding=0)
-        self.plot_graph.setYRange(new_y_range[0], new_y_range[1], padding=0)
 
 
 # Start the application
