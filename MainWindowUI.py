@@ -125,46 +125,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.Channel1Editor = ChannelEditor(self.centralwidget, 1090, 100, 261, 281, "Channel 1", self.Channel1Viewer)
         self.Channel2Editor = ChannelEditor(self.centralwidget, 1090, 500, 261, 281, "Channel 2", self.Channel2Viewer)
 
-        # signal controls
-        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
-        self.scrollArea.setGeometry(QtCore.QRect(0, 60, 271, 800))
-        self.scrollArea.setWidgetResizable(True)  # Ensure the scroll area resizes automatically
-        self.scrollArea.setStyleSheet("background-color: rgb(42, 42, 42); border:0px;")
-        scrollbar = QScrollBar()
-        scrollbar.setStyleSheet("""
-        QScrollBar:vertical {
-            border: 1px solid #999999;
-            background: #f9f9f9;
-            width: 12px;
-            margin: 0px 0px 0px 0px;
-        }
-        QScrollBar::handle:vertical {
-            background: #555555;
-            min-height: 20px;
-        }
-    """)
-        self.scrollArea.setVerticalScrollBar(scrollbar)
-        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.signalEditor1 = SignalEditor(self.centralwidget, 50, 100, 231, 300,self.signalEditorID,)
+        self.signalEditor2 = SignalEditor(self.centralwidget, 50, 500, 231, 300,self.signalEditorID)
 
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
+        self.signalEditor1.SignalComboBox.currentIndexChanged.connect(lambda : self.apply_controls("channel 1"))
+        self.signalEditor2.SignalComboBox.currentIndexChanged.connect(lambda : self.apply_controls("channel 2"))
+        self.signal_id = None 
 
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        # self.Signal1EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 1")
-        # self.Signal2EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 2")
-        # self.Signal3EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 3")
-        # self.Signal4EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 4")
-        # self.Signal5EditingWindow = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 251, "Signal 5")
-
-        # # Add them to the layout
-        # self.verticalLayout.addWidget(self.Signal1EditingWindow)
-        # self.verticalLayout.addWidget(self.Signal2EditingWindow)
-        # self.verticalLayout.addWidget(self.Signal3EditingWindow)
-        # self.verticalLayout.addWidget(self.Signal4EditingWindow)
-        # self.verticalLayout.addWidget(self.Signal5EditingWindow)
+        
 
         # Taskbar Setup
         self.TaskBar = QtWidgets.QFrame(self.centralwidget)
@@ -479,6 +447,53 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.Channel1Viewer.changeSpeed(value)
         self.Channel2Viewer.changeSpeed(value)
 
+
+    def apply_controls(self, channel):
+        # Get the currently selected item's index and associated signalId
+        if channel == "channel 1":
+            current_index = self.signalEditor1.SignalComboBox.currentIndex()
+
+            if current_index == -1:  # No item selected
+                return
+
+            self.signal_id = self.signalEditor1.SignalComboBox.itemData(current_index)
+            selected_signal_text = self.signalEditor1.SignalComboBox.currentText()
+
+            # Print the selected signal details
+            print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
+
+            self.signalEditor1.ColorButton.clicked.connect(lambda: self.changeColor(self.signal_id))
+            self.signalEditor1.renameTextField.returnPressed.connect(lambda: self.rename(self.signal_id))
+            # self.signalEditor1.nonpolarButton.clicked.connect(
+            #     lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
+            self.signalEditor1.channel1Checkbox.setChecked(True)
+            self.signalEditor1.channel1Checkbox.stateChanged.connect(
+                lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
+            self.signalEditor1.channel2Checkbox.stateChanged.connect(
+                lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
+
+        if channel == "channel 2":
+            current_index = self.signalEditor2.SignalComboBox.currentIndex()
+
+            if current_index == -1:  # No item selected
+                return
+
+            self.signal_id = self.signalEditor2.SignalComboBox.itemData(current_index)
+            selected_signal_text = self.signalEditor2.SignalComboBox.currentText()
+
+            # Print the selected signal details
+            print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
+
+            self.signalEditor2.ColorButton.clicked.connect(lambda: self.changeColor(self.signal_id))
+            self.signalEditor2.renameTextField.returnPressed.connect(lambda: self.rename(self.signal_id))
+            # self.signalEditor1.nonpolarButton.clicked.connect(
+            #     lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
+            self.signalEditor2.channel1Checkbox.setChecked(True)
+            self.signalEditor2.channel1Checkbox.stateChanged.connect(
+                lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
+            self.signalEditor2.channel2Checkbox.stateChanged.connect(
+                lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
+
     def createSignalEditor(self):
 
         signal = self.Channel1Viewer.uploadSignal()
@@ -486,27 +501,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.signalID += 1
             self.signalEditorID += 1
             self.signals.append(signal)
-            signalEditor = SignalEditor(self.scrollAreaWidgetContents, 0, 0, 231, 350, f"Signal {str(self.signalID)}",
-                                        self.signalEditorID)
-            self.verticalLayout.addWidget(signalEditor)
-            self.signalEditingWindows.append(signalEditor)
-            signalEditor.setVisible(True)
             self.PlayChannel1.setIcon(self.iconpause)
-            self.scrollArea.update()
-            # self.scrollArea.adjustSize()
-            # self.scrollAreaWidgetContents.updateGeometry()
-            # self.scrollArea.updateGeometry()
-            # self.scrollArea.verticalScrollBar().setValue(self.scrollArea.verticalScrollBar().maximum())
 
-        signalEditor.ColorButton.clicked.connect(lambda: self.changeColor(signalEditor.ID))
-        signalEditor.renameTextField.returnPressed.connect(lambda: self.rename(signalEditor.ID))
-        signalEditor.nonpolarButton.clicked.connect(
-            lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
-        signalEditor.channel1Checkbox.setChecked(True)
-        signalEditor.channel1Checkbox.stateChanged.connect(
-            lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id, state))
-        signalEditor.channel2Checkbox.stateChanged.connect(
-            lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
+            new_signal_label = f"Signal {self.signalID}"
+
+            # Add the new signal to the combo box with its signalId as itemData
+            self.signalEditor1.SignalComboBox.addItem(new_signal_label, self.signalID)
+
+
+
+            
+            
+            self.signalEditor2.ColorButton.clicked.connect(lambda: self.changeColor(signal.signalId))
+            self.signalEditor2.renameTextField.returnPressed.connect(lambda: self.rename(signal.signalId))
+            self.signalEditor2.nonpolarButton.clicked.connect(
+                lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
+            self.signalEditor2.channel1Checkbox.setChecked(True)
+            self.signalEditor2.channel1Checkbox.stateChanged.connect(
+                lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id, state))
+            self.signalEditor2.channel2Checkbox.stateChanged.connect(
+                lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
+            
+        
 
     def get_checked_signal_id(self, channelViewer):
         signals_checked_id = []
@@ -586,50 +602,48 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     break
 
     def rename(self, signalEditorId):
-        signal = None
         entered_text = None
+        # Update Channel 1 signals
         for signal in self.Channel1Viewer.signalsChannel:
             if signal.signalId == signalEditorId:
-                signalEditor = self.signalEditingWindows[signal.signalId - 1]
-                entered_text = signalEditor.renameTextField.text()
+                entered_text = self.signalEditor1.renameTextField.text()
                 if entered_text.strip():
-                    signal.label = entered_text
-                    signalEditor.SignalLabel.setText(entered_text)
-                    signal.rename_signal(entered_text)
-                    break
+                    signal.name = entered_text
+
+                    # Find the corresponding item in the ComboBox
+                    for i in range(self.signalEditor1.SignalComboBox.count()):
+                        if self.signalEditor1.SignalComboBox.itemData(i) == signal.signalId:
+                            self.signalEditor1.SignalComboBox.setItemText(i, entered_text)
+                            signal.rename_signal(entered_text)
+                            break
+
+        # Update Channel 2 signals
         for signal in self.Channel2Viewer.signalsChannel:
             if signal.signalId == signalEditorId:
-                signalEditor = self.signalEditingWindows[signal.signalId - 1]
-                entered_text = signalEditor.renameTextField.text()
+                entered_text = self.signalEditor2.renameTextField.text()
                 if entered_text.strip():
                     signal.label = entered_text
-                    signalEditor.SignalLabel.setText(entered_text)
-                    signal.rename_signal(entered_text)
-                    break
 
-        # for i, plot_item in enumerate(signal.plot_widget.listDataItems()):
-        #         if (plot_item.getData()[1] == signal.y[:len(plot_item.getData()[1])]).all():
-        #                 if entered_text.strip():
-        #                         self.Channel1Viewer.legend.removeItem(plot_item)
-        #                         self.Channel1Viewer.legend.addItem(plot_item,signal.label)
-        #                         break
+                    # Find the corresponding item in the ComboBox
+                    for i in range(self.signalEditor2.SignalComboBox.count()):
+                        if self.signalEditor2.SignalComboBox.itemData(i) == signal.signalId:
+                            self.signalEditor2.SignalComboBox.setItemText(i, entered_text)
+                            signal.rename_signal(entered_text)
+                            break
 
-    def changeColor(self, signalEditorID):
-        color = QColorDialog.getColor()
+    def changeColor(self,signalEditorID):
+                color = QColorDialog.getColor()
+                
+                if color.isValid():
+                        signal = None
+                        # Apply the selected color to the signal
+                        for signal in self.signals:
+                               if signal.signalId == signalEditorID:
+                                      signal.color = color
+                                      signal.change_color(color)
+                                      break
 
-        if color.isValid():
-            signal = None
-            # Apply the selected color to the signal
-            for signal in self.Channel1Viewer.signalsChannel:
-                if signal.signalId == signalEditorID:
-                    signal.color = color
-                    signal.change_color(color)
-                    break
-            for signal in self.Channel2Viewer.signalsChannel:
-                if signal.signalId == signalEditorID:
-                    signal.color = color
-                    signal.change_color(color)
-                    break
+
 
     # NADA'S ADDITION
     def show_polar_view(self, timestamps, signal_values, signal_label, signal_color):

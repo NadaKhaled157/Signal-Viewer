@@ -1,10 +1,10 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 class SignalEditor(QtWidgets.QFrame):
-    def __init__(self, parent, x, y, width, height, label_text, id):
+    def __init__(self, parent, x, y, width, height, id):
         super(SignalEditor, self).__init__(parent)
         self.ID=id
-        self.setMinimumSize(231, 350)
+        self.setMinimumSize(231, 300)
         # Set geometry and style of SignalEditor window
         self.setGeometry(QtCore.QRect(x, y, width, height))
         self.setStyleSheet("background-color: rgb(24, 24, 24);")
@@ -12,7 +12,7 @@ class SignalEditor(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Raised)
         _translate = QtCore.QCoreApplication.translate
 
-        rename_icon = QtGui.QIcon("Deliverables/rename.png")
+        
         color_icon = QtGui.QIcon("Deliverables/color-wheel.png")
         
         # Inner window setup
@@ -26,15 +26,38 @@ class SignalEditor(QtWidgets.QFrame):
         self.InnerSignalWindow.setFrameShadow(QtWidgets.QFrame.Raised)
 
         # Label
-        self.SignalLabel = QtWidgets.QLabel(self.InnerSignalWindow)
-        self.SignalLabel.setGeometry(QtCore.QRect(30, 20, 150, 31))
-        self.SignalLabel.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                       "font-size: 18px")
-        self.SignalLabel.setText(label_text)
-        self.SignalLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.SignalComboBox = QtWidgets.QComboBox(self.InnerSignalWindow)
+        self.SignalComboBox.setGeometry(QtCore.QRect(30, 20, 150, 31))
+        self.SignalComboBox.setStyleSheet("""
+            QComboBox {
+                color: rgb(255, 255, 255);
+                font-size: 18px;
+                background-color: rgb(24, 24, 24);
+                padding-left: 15px;
+                border: 1px solid transparent;
+                border-radius: 15px; /* Rounded corners */
+            }
+
+            /* Remove the default arrow */
+            QComboBox::drop-down {
+                margin-right: 10px;
+                border-top-right-radius: 15px; /* Apply radius to the top-right */
+                border-bottom-right-radius: 15px; /* Apply radius to the bottom-right */
+            }
+
+            /* Customize the arrow (triangle) */
+            QComboBox::down-arrow {
+                image: url(Deliverables/down-arrow.png); /* Optional: use a custom image for the arrow */
+                width: 10px;
+                height: 10px;
+                margin-right: 10px; /* Moves the arrow more to the right */
+            }
+        """)
+        self.SignalComboBox.setEditable(False)  # Set to True if you want the user to be able to type in the box
+        
         
         self.renameTextField = QtWidgets.QLineEdit(self.InnerSignalWindow)
-        self.renameTextField.setGeometry(QtCore.QRect(30, 80, 150, 40))
+        self.renameTextField.setGeometry(QtCore.QRect(30, 70, 150, 40))
         self.renameTextField.setPlaceholderText("Change name")
         self.renameTextField.setStyleSheet(
             "background-color: rgb(24, 24, 24);\n"
@@ -50,7 +73,7 @@ class SignalEditor(QtWidgets.QFrame):
         
         # Color Button
         self.ColorButton = QtWidgets.QPushButton(self.InnerSignalWindow)
-        self.ColorButton.setGeometry(QtCore.QRect(35, 140, 131, 40))
+        self.ColorButton.setGeometry(QtCore.QRect(40, 130, 131, 40))
         self.ColorButton.setStyleSheet(
             "background-color: rgb(24, 24, 24);\n"
             "color: rgb(255, 255, 255);\n"
@@ -63,18 +86,18 @@ class SignalEditor(QtWidgets.QFrame):
 
         # Channel 1 Checkbox
         self.channel1Checkbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
-        self.channel1Checkbox.setGeometry(QtCore.QRect(20, 280, 81, 20))
+        self.channel1Checkbox.setGeometry(QtCore.QRect(20, 245, 81, 20))
         self.channel1Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
         self.channel1Checkbox.setText(_translate("MainWindow","Channel 1"))
         
         # Channel 2 Checkbox
         self.channel2Checkbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
-        self.channel2Checkbox.setGeometry(QtCore.QRect(110, 280, 81, 20))
+        self.channel2Checkbox.setGeometry(QtCore.QRect(110, 245, 81, 20))
         self.channel2Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
         self.channel2Checkbox.setText(_translate("MainWindow","Channel 2"))
 
         self.nonpolarButton = QtWidgets.QPushButton(self.InnerSignalWindow)
-        self.nonpolarButton.setGeometry(QtCore.QRect(35, 200, 131, 41))
+        self.nonpolarButton.setGeometry(QtCore.QRect(40, 190, 131, 41))
         self.nonpolarButton.setStyleSheet("background-color: rgb(24, 24, 24);\n"
         "color: rgb(255, 255, 255);\n"
         "border: 1px;\n"
