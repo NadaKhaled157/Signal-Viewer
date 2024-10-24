@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import  QColorDialog
+from PyQt5.QtWidgets import  QColorDialog, QMessageBox
+from PyQt5.QtGui import QIcon
 from ChannelEditor import ChannelEditor
 from SignalEditWindow import SignalEditor
 from main import *
 from PolarSignal import PolarWindow
 from LiveSignal import DataFetcher
-from ExportToPdf import ExportToPdf, save_image
+from ExportToPdf import ExportToPdf
 from GlueOptions import GlueOptions
 import time
 import threading
@@ -656,8 +657,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         print(signalID)
         for signal in self.signals:
             if signal.signalId == signalID:
-                signal_window = PolarWindow(signal.x, signal.y, signal.name, signal.color)
-                signal_window.show()
+                try:
+                    signal_window = PolarWindow(signal.x, signal.y, signal.name, signal.color)
+                    signal_window.show()
+                except:
+                    error_message = QMessageBox()
+                    error_message.setWindowTitle("Error")
+                    error_icon = QIcon("Deliverables/error_icon.png")
+                    error_message.setWindowIcon(error_icon)
+                    error_message.setText("An error occured. Please try again.")
+                    error_message.setStandardButtons(QMessageBox.Ok)
+                    error_message.exec_()
 
     def live_connection(self, status):
         if status == "connect":

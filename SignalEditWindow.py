@@ -37,6 +37,13 @@ class SignalEditor(QtWidgets.QFrame):
                 border: 1px solid transparent;
                 border-radius: 15px; /* Rounded corners */
             }
+            
+            QComboBox QAbstractItemView {
+                background-color: #444444;    /* Dropdown list background */
+                color: #ffffff;               /* Dropdown list text color */
+                selection-background-color: #555555;  /* Highlight background */
+                selection-color: #FF5757;     /* Highlighted text color */
+            }
 
             /* Remove the default arrow */
             QComboBox::drop-down {

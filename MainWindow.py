@@ -2,6 +2,7 @@ from main import *
 from MainWindowUI import Ui_MainWindow
 from GlueOptions import GlueOptions
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtGui import QIcon
 
 
 class MyMainWindow(QMainWindow):
@@ -191,8 +192,9 @@ class MyMainWindow(QMainWindow):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
-            msg.setText("Warning: You must select exactly one signal to glue.")
+            msg.setText("Warning: You must select <b>one</b> signal per channel to glue.")
             msg.setWindowTitle("Selection Error")
+            msg.setWindowIcon(QIcon("Deliverables/error_icon.png"))
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
             self.delete_rectangle()

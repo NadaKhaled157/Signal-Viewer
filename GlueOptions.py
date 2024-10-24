@@ -47,7 +47,38 @@ class GlueOptions(QDialog):
         self.label_order = QLabel('Interpolation order:')
         self.combo_order = QComboBox(self)
         self.combo_order.addItems(['linear', 'cubic', 'quadratic'])
-        self.combo_order.setStyleSheet(" background-color: gray; ")
+        self.combo_order.setStyleSheet("""
+            QComboBox {
+                color: rgb(255, 255, 255);
+                font-size: 18px;
+                background-color: rgb(24, 24, 24);
+                padding-left: 15px;
+                border: 1px solid transparent;
+                border-radius: 15px; /* Rounded corners */
+            }
+            
+            QComboBox QAbstractItemView {
+                background-color: #444444;    /* Dropdown list background */
+                color: #ffffff;               /* Dropdown list text color */
+                selection-background-color: #555555;  /* Highlight background */
+                selection-color: #FF5757;     /* Highlighted text color */
+            }
+
+            /* Remove the default arrow */
+            QComboBox::drop-down {
+                margin-right: 10px;
+                border-top-right-radius: 15px; /* Apply radius to the top-right */
+                border-bottom-right-radius: 15px; /* Apply radius to the bottom-right */
+            }
+
+            /* Customize the arrow (triangle) */
+            QComboBox::down-arrow {
+                image: url(Deliverables/down-arrow.png); /* Optional: use a custom image for the arrow */
+                width: 10px;
+                height: 10px;
+                margin-right: 10px; /* Moves the arrow more to the right */
+            }
+        """)
         self.combo_order.setGeometry(40, 285, 110, 30)
 
         shift_buttons_layout.addWidget(self.label_order)
