@@ -15,7 +15,11 @@ class PolarWindow(QMainWindow):
         self.time = timestamps
         self.signal_values = signal_values
         self.signal_label = signal_label
-        self.signal_color = tuple(value/255 for value in tuple(signal_color))
+        if isinstance(signal_color, tuple):
+            self.signal_color = tuple(value / 255 for value in tuple(signal_color))
+        else:
+            r, g, b, a = signal_color.getRgb()
+            self.signal_color = (r / 255, g / 255, b / 255)
         self.theta = 2 * np.pi * self.time / max(self.time)  # normalize time to (0,2pi)
 
         self.radar_radius = 1
