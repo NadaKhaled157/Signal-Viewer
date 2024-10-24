@@ -15,7 +15,7 @@ class GlueOptions(QDialog):
         self.interpolation_order = "linear"
         self.gluedSignals = gluedSignals
         self.glued_count = 0
-        self.glued_lists = np.array()
+        self.glued_lists = []
         self.glued_x = []
         self.glued_y = []
         self.setStyleSheet("background-color: #181818;")
