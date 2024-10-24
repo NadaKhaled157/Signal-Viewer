@@ -24,9 +24,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.signalEditingWindows = []
         self.signals = [];
-        self.signalID = 0;
+        self.signal_id = 0;
         self.signalEditorID = 0;
         self.isSyncEnabled = False
+
+        
 
         # LIVE SIGNAL VARIABLES
         self.thread = None
@@ -128,9 +130,27 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.signalEditor1 = SignalEditor(self.centralwidget, 50, 100, 231, 300,self.signalEditorID,)
         self.signalEditor2 = SignalEditor(self.centralwidget, 50, 500, 231, 300,self.signalEditorID)
 
-        self.signalEditor1.SignalComboBox.currentIndexChanged.connect(lambda : self.apply_controls("channel 1"))
-        self.signalEditor2.SignalComboBox.currentIndexChanged.connect(lambda : self.apply_controls("channel 2"))
-        self.signal_id = None 
+
+        self.signalEditor1.ColorButton.clicked.connect(lambda: self.apply_controls("channel 1","color"))
+        self.signalEditor1.renameTextField.returnPressed.connect(lambda: self.apply_controls("channel 1","rename"))
+        self.signalEditor1.nonpolarButton.clicked.connect(
+                lambda: self.apply_controls("channel 1","polar"))  # From Nada
+        self.signalEditor1.channel1Checkbox.setChecked(True)
+        self.signalEditor1.channel1Checkbox.stateChanged.connect(
+            lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
+        self.signalEditor1.channel2Checkbox.stateChanged.connect(
+            lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
+        
+        self.signalEditor2.ColorButton.clicked.connect(lambda: self.apply_controls("channel 2","color"))
+        self.signalEditor2.renameTextField.returnPressed.connect(lambda: self.apply_controls("channel 2","rename"))
+        self.signalEditor2.nonpolarButton.clicked.connect(
+            lambda: self.apply_controls("channel 2","polar"))  # From Nada
+        self.signalEditor2.channel1Checkbox.setChecked(True)
+        self.signalEditor2.channel1Checkbox.stateChanged.connect(
+            lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
+        self.signalEditor2.channel2Checkbox.stateChanged.connect(
+            lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
+    
 
         
 
@@ -448,7 +468,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.Channel2Viewer.changeSpeed(value)
 
 
-    def apply_controls(self, channel):
+    def apply_controls(self, channel, control):
         # Get the currently selected item's index and associated signalId
         if channel == "channel 1":
             current_index = self.signalEditor1.SignalComboBox.currentIndex()
@@ -458,19 +478,18 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             self.signal_id = self.signalEditor1.SignalComboBox.itemData(current_index)
             selected_signal_text = self.signalEditor1.SignalComboBox.currentText()
-
-            # Print the selected signal details
             print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
 
-            self.signalEditor1.ColorButton.clicked.connect(lambda: self.changeColor(self.signal_id))
-            self.signalEditor1.renameTextField.returnPressed.connect(lambda: self.rename(self.signal_id))
-            # self.signalEditor1.nonpolarButton.clicked.connect(
-            #     lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
-            self.signalEditor1.channel1Checkbox.setChecked(True)
-            self.signalEditor1.channel1Checkbox.stateChanged.connect(
-                lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
-            self.signalEditor1.channel2Checkbox.stateChanged.connect(
-                lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
+            
+            if control == "rename":
+                self.rename(self.signal_id)
+
+            elif control == "color":
+                self.changeColor(self.signal_id)
+
+            elif control == "polar":
+                self.show_polar_view(self.signal_id)
+
 
         if channel == "channel 2":
             current_index = self.signalEditor2.SignalComboBox.currentIndex()
@@ -481,46 +500,27 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.signal_id = self.signalEditor2.SignalComboBox.itemData(current_index)
             selected_signal_text = self.signalEditor2.SignalComboBox.currentText()
 
-            # Print the selected signal details
             print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
 
-            self.signalEditor2.ColorButton.clicked.connect(lambda: self.changeColor(self.signal_id))
-            self.signalEditor2.renameTextField.returnPressed.connect(lambda: self.rename(self.signal_id))
-            # self.signalEditor1.nonpolarButton.clicked.connect(
-            #     lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
-            self.signalEditor2.channel1Checkbox.setChecked(True)
-            self.signalEditor2.channel1Checkbox.stateChanged.connect(
-                lambda state, s_id=self.signal_id: self.selectChannel1StateChanged(s_id, state))
-            self.signalEditor2.channel2Checkbox.stateChanged.connect(
-                lambda state, s_id=self.signal_id: self.selectChannel2StateChanged(s_id, state))
 
     def createSignalEditor(self):
 
         signal = self.Channel1Viewer.uploadSignal()
         if signal is not None:
-            self.signalID += 1
+            self.signal_id += 1
             self.signalEditorID += 1
             self.signals.append(signal)
             self.PlayChannel1.setIcon(self.iconpause)
 
-            new_signal_label = f"Signal {self.signalID}"
+            new_signal_label = f"Signal {self.signal_id}"
 
             # Add the new signal to the combo box with its signalId as itemData
-            self.signalEditor1.SignalComboBox.addItem(new_signal_label, self.signalID)
+            self.signalEditor1.SignalComboBox.addItem(new_signal_label, self.signal_id)
 
 
 
             
             
-            self.signalEditor2.ColorButton.clicked.connect(lambda: self.changeColor(signal.signalId))
-            self.signalEditor2.renameTextField.returnPressed.connect(lambda: self.rename(signal.signalId))
-            self.signalEditor2.nonpolarButton.clicked.connect(
-                lambda: self.show_polar_view(signal.x, signal.y, signal.name, signal.color))  # From Nada
-            self.signalEditor2.channel1Checkbox.setChecked(True)
-            self.signalEditor2.channel1Checkbox.stateChanged.connect(
-                lambda state, s_id=signal.signalId: self.selectChannel1StateChanged(s_id, state))
-            self.signalEditor2.channel2Checkbox.stateChanged.connect(
-                lambda state, s_id=signal.signalId: self.selectChannel2StateChanged(s_id, state))
             
         
 
@@ -603,6 +603,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def rename(self, signalEditorId):
         entered_text = None
+        print(signalEditorId)
         # Update Channel 1 signals
         for signal in self.Channel1Viewer.signalsChannel:
             if signal.signalId == signalEditorId:
@@ -643,12 +644,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                       signal.change_color(color)
                                       break
 
+    def refillSignal (self, channel):
+        if channel == "channel 1":
+            self.signalEditor1.SignalComboBox.clear()
+            for signal in self.Channel1Viewer.signalsChannel:
+                self.signalEditor1.SignalComboBox.addItem(signal.name,self.signal_id)
 
 
     # NADA'S ADDITION
-    def show_polar_view(self, timestamps, signal_values, signal_label, signal_color):
-        signal_window = PolarWindow(timestamps, signal_values, signal_label, signal_color)
-        signal_window.show()
+    def show_polar_view(self, signalID):
+        print(signalID)
+        for signal in self.signals:
+            if signal.signalId == signalID:
+                signal_window = PolarWindow(signal.x, signal.y, signal.name, signal.color)
+                signal_window.show()
 
     def live_connection(self, status):
         if status == "connect":

@@ -52,11 +52,13 @@ class SignalObject:
         self.plot_widget.setXRange(self.x[start], self.x[end])
 
     def rename_signal(self, name):
-        self.name = name
+        self.name = name  
         self.line.clear()
         self.plot_widget.legend.removeItem(self.line)
         self.line = self.plot_widget.plot(self.time, self.magnitude, pen=pg.mkPen(color=self.color, width=2.5),
                                           name=name)
+    
+    
 
     def change_color(self, color):
 
