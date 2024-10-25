@@ -92,16 +92,16 @@ class SignalEditor(QtWidgets.QFrame):
         self.ColorButton.setText(_translate("MainWindow","Change Color"))
 
         # Channel 1 Checkbox
-        self.channel1Checkbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
-        self.channel1Checkbox.setGeometry(QtCore.QRect(20, 245, 81, 20))
-        self.channel1Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
-        self.channel1Checkbox.setText(_translate("MainWindow","Channel 1"))
-        
+        self.showHideCheckbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
+        self.showHideCheckbox.setGeometry(QtCore.QRect(20, 245, 81, 20))
+        self.showHideCheckbox.setStyleSheet("color: rgb(255, 255, 255);")
+        self.showHideCheckbox.setText(_translate("MainWindow", "Show/Hide"))
+
         # Channel 2 Checkbox
-        self.channel2Checkbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
-        self.channel2Checkbox.setGeometry(QtCore.QRect(110, 245, 81, 20))
-        self.channel2Checkbox.setStyleSheet("color: rgb(255, 255, 255);")
-        self.channel2Checkbox.setText(_translate("MainWindow","Channel 2"))
+        self.moveSignal2anotherGraph = QtWidgets.QPushButton(self.InnerSignalWindow)
+        self.moveSignal2anotherGraph.setGeometry(QtCore.QRect(110, 245, 81, 20))
+        self.moveSignal2anotherGraph.setStyleSheet("color: rgb(255, 255, 255);")
+        self.moveSignal2anotherGraph.setText(_translate("MainWindow", "move signal"))
 
         self.nonpolarButton = QtWidgets.QPushButton(self.InnerSignalWindow)
         self.nonpolarButton.setGeometry(QtCore.QRect(40, 190, 131, 41))
