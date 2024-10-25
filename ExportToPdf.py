@@ -74,7 +74,6 @@ class ExportToPdf(FPDF):
         #     count = count - 1
 
         print(all_glued_signals)
-        self.save_pdf()
 
     def header(self):
         if self.first_page == True:
@@ -148,16 +147,16 @@ class ExportToPdf(FPDF):
             first_glue = False
             print(f"glued count: {self.glued_images_count}")
 
-    def save_pdf(self):
-        counter = 2
-        file_name = 'Signal Glue Report1.pdf'
-        while os.path.exists(f"Reports/{file_name}"):
-            file_name = f"Signal Glue Report{counter}.pdf"
-            counter = counter + 1
-        self.output(f"Reports/{file_name}")
+    # def save_pdf(self):
+    #     counter = 2
+    #     file_name = 'Signal Glue Report1.pdf'
+    #     while os.path.exists(f"Reports/{file_name}"):
+    #         file_name = f"Signal Glue Report{counter}.pdf"
+    #         counter = counter+1
+    #     self.output(f"Reports/{file_name}")
 
-        # self.set_title('Signal Glue Report.pdf')
-        # self.save_pdf()
+    # self.set_title('Signal Glue Report.pdf')
+    # self.save_pdf()
 
 # statistics = {'Mean': 1, 'Median': 22, 'STD': 3}
 # statistics2 = {'Mean': 11, 'Median': 22, 'STD': 3}

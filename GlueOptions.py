@@ -6,8 +6,8 @@ class GlueOptions(QDialog):
     def __init__(self, portionx1, portiony1, portionx2, portiony2,gluedSignals, main_window):
         super().__init__()
         self.main_window = main_window
-        self.setWindowTitle("signal Gluer")
-        self.setWindowIcon(QIcon("Deliverables/app icon.png.png"))
+        self.setWindowTitle("Signal Glue")
+        self.setWindowIcon(QIcon("Deliverables/app icon.png"))
         self.portion_x1 = portionx1
         self.portion_y1 = portiony1
         self.portion_x2 = portionx2
@@ -22,6 +22,7 @@ class GlueOptions(QDialog):
         self.setFixedSize(800, 600)
 
         # Main layout for the QDialog
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.main_glue_options_layout = QVBoxLayout(self)
         shift_buttons_layout = QHBoxLayout()
         graph1_layout = QVBoxLayout()
@@ -109,7 +110,7 @@ class GlueOptions(QDialog):
         save_glue_button.setIcon(icon_save)
         save_glue_button.setStyleSheet("background-color:gray; border-radius:20px; color:white;")
         save_glue_button.setFixedSize(170, 40)
-        save_glue_button.setGeometry(350, 550, 400, 400)
+        save_glue_button.setGeometry(300, 550, 400, 400)
         save_glue_button.clicked.connect(lambda: self.save_glue(self.plot_graph_glued_signal))
 
         # Input for shift amount
