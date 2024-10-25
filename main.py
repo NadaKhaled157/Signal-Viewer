@@ -136,16 +136,17 @@ class SignalCine(QtWidgets.QFrame):
             signal.update()
         self.plot_graph.update()
 
-    def uploadSignal(self):
+    def uploadSignal(self, signalCount):
         print("Button clicked")
         x, y = self.open_file()
         if x is not None and y is not None:
+            signalCount += 1
             color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             while color in self.used_color:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             self.used_color.add(color)
             self.signalId += 1
-            signal = SignalObject(x, y, self.plot_graph, color, f"signal {len(self.signalsChannel) + 1}", self.signalId)
+            signal = SignalObject(x, y, self.plot_graph, color, f"signal {signalCount}", self.signalId)
             self.signalsChannel.append(signal)
 
             # Set the scroll bar conditions
@@ -166,7 +167,7 @@ class SignalCine(QtWidgets.QFrame):
             self.timer.start()
             print("x data:", x)
             print("y data:", y)
-            return signal
+            return signalCount, signal
 
     def detectRangeChange(self):
         #  print("iam here")

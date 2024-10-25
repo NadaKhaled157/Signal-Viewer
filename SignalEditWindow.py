@@ -91,17 +91,20 @@ class SignalEditor(QtWidgets.QFrame):
         self.ColorButton.setIcon(color_icon)
         self.ColorButton.setText(_translate("MainWindow","Change Color"))
 
-        # Channel 1 Checkbox
+        
         self.showHideCheckbox = QtWidgets.QCheckBox(self.InnerSignalWindow)
-        self.showHideCheckbox.setGeometry(QtCore.QRect(20, 245, 81, 20))
+        self.showHideCheckbox.setGeometry(QtCore.QRect(60, 245, 60, 30))
         self.showHideCheckbox.setStyleSheet("color: rgb(255, 255, 255);")
-        self.showHideCheckbox.setText(_translate("MainWindow", "Show/Hide"))
+        
 
-        # Channel 2 Checkbox
+        
         self.moveSignal2anotherGraph = QtWidgets.QPushButton(self.InnerSignalWindow)
-        self.moveSignal2anotherGraph.setGeometry(QtCore.QRect(110, 245, 81, 20))
-        self.moveSignal2anotherGraph.setStyleSheet("color: rgb(255, 255, 255);")
-        self.moveSignal2anotherGraph.setText(_translate("MainWindow", "move signal"))
+        self.moveSignal2anotherGraph.setGeometry(QtCore.QRect(120, 245, 30, 30))
+        self.moveSignal2anotherGraph.setStyleSheet("background-color: rgb(24, 24, 24);\n"
+                                         "color: rgb(255, 255, 255);\n"
+                                         "border: 1px;\n"
+                                         "border-radius: 15px;\n"
+                                         "font-weight:800;")
 
         self.nonpolarButton = QtWidgets.QPushButton(self.InnerSignalWindow)
         self.nonpolarButton.setGeometry(QtCore.QRect(40, 190, 131, 41))
@@ -116,8 +119,4 @@ class SignalEditor(QtWidgets.QFrame):
         self.nonpolarButton.setObjectName("nonpolarButton")
         self.nonpolarButton.setText(_translate("MainWindow","Show in Polar"))
 
-    def getCheckBox(self,ch1=True):
-        if ch1:
-            return self.channel1Checkbox
-        else:
-            return self.channel1Checkbox
+    

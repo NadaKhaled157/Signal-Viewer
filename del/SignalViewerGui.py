@@ -626,8 +626,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         "background-color:transparent;\n"
         "font-weight:800;")
 
-                self.ExportButton.clicked.connect(lambda: self.save_report(GlueOptions.glue_window.gluedSignals[0],self.gluedSignals[1]),
-                                                  self.glued_count)
+                self.ExportButton.clicked.connect(
+                    lambda: self.enter_file_name(MainWindow.all_channel_one_signals, MainWindow.all_channel_two_signals,
+                                                 MainWindow.glue_window.glued_y, MainWindow.all_glued_signals,
+                                                 MainWindow.glued_count))
                 icon7 = QtGui.QIcon()
                 icon7.addPixmap(QtGui.QPixmap("../Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 self.ExportButton.setIcon(icon7)

@@ -25,10 +25,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.centralwidget.setObjectName("centralwidget")
 
         self.signalEditingWindows = []
-        self.signals = [];
+        self.signals = []
         self.signal_id = 0;
         self.signalEditorID = 0;
         self.isSyncEnabled = False
+        self.signalCount = 0
 
         
 
@@ -132,12 +133,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.signalEditor1 = SignalEditor(self.centralwidget, 50, 100, 231, 300,self.signalEditorID,)
         self.signalEditor2 = SignalEditor(self.centralwidget, 50, 500, 231, 300,self.signalEditorID)
 
+        
+        self.iconHide = QIcon("Deliverables/hide.png")
+        self.iconUp = QIcon("Deliverables/up.png")
+        self.icondown = QIcon("Deliverables/down.png")
+        self.signalEditor1.showHideCheckbox.setIcon(self.iconHide)
+        self.signalEditor2.showHideCheckbox.setIcon(self.iconHide)
+        self.signalEditor1.moveSignal2anotherGraph.setIcon(self.icondown)
+        self.signalEditor2.moveSignal2anotherGraph.setIcon(self.iconUp)
 
         self.signalEditor1.ColorButton.clicked.connect(lambda: self.apply_controls("channel 1","color"))
         self.signalEditor1.renameTextField.returnPressed.connect(lambda: self.apply_controls("channel 1","rename"))
         self.signalEditor1.nonpolarButton.clicked.connect(
                 lambda: self.apply_controls("channel 1","polar"))  # From Nada
-        self.signalEditor1.showHideCheckbox.setChecked(True)
+        # self.signalEditor1.showHideCheckbox.setChecked(True)
         self.signalEditor1.showHideCheckbox.stateChanged.connect(
             lambda state: self.apply_controls("channel 1" ,"show/hide",state))
         self.signalEditor1.moveSignal2anotherGraph.clicked.connect(
@@ -149,11 +158,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.signalEditor2.nonpolarButton.clicked.connect(
             lambda: self.apply_controls("channel 2","polar"))  # From Nada
 
-        self.signalEditor2.showHideCheckbox.setChecked(True)
+        # self.signalEditor2.showHideCheckbox.setChecked(True)
         self.signalEditor2.showHideCheckbox.stateChanged.connect(
             lambda state: self.apply_controls("channel 2" ,"show/hide",state))
-        self.signalEditor2.moveSignal2anotherGraph.setVisible(False)
-
+        self.signalEditor2.moveSignal2anotherGraph.clicked.connect(
+            lambda: self.apply_controls("channel 2" , "move_signal"))
+        self.signalEditor2.moveSignal2anotherGraph.setEnabled(True)
 
         
 
@@ -214,9 +224,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                         "font-weight:800;")
 
         self.ExportButton.clicked.connect(
-            lambda: self.enter_file_name(MainWindow.all_channel_one_signals, MainWindow.all_channel_two_signals,
-                                         MainWindow.glue_window.glued_y, MainWindow.all_glued_signals,
-                                         MainWindow.glued_count))
+            lambda: self.save_report(MainWindow.toBeGluedSignals[0], MainWindow.toBeGluedSignals[1],
+            MainWindow.glue_window.glued_y, MainWindow.glue_window.glued_lists, MainWindow.glue_window.glued_count))
         icon7 = QtGui.QIcon()
         icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ExportButton.setIcon(icon7)
@@ -475,63 +484,74 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def apply_controls(self, channel, control, state = None):
         # Get the currently selected item's index and associated signalId
         if channel == "channel 1":
-            current_index = self.signalEditor1.SignalComboBox.currentIndex()
+            self.signal_id= self.signalEditor1.SignalComboBox.currentIndex()
 
-            if current_index == -1:  # No item selected
+            if self.signal_id == -1:  # No item selected
                 return
 
-            self.signal_id = self.signalEditor1.SignalComboBox.itemData(current_index)
+            # self.signal_id = self.signalEditor1.SignalComboBox.itemData(current_index)
             selected_signal_text = self.signalEditor1.SignalComboBox.currentText()
             print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
 
             
             if control == "rename":
-                self.rename(self.signal_id)
+                self.rename(self.signal_id,"channel 1")
 
             elif control == "color":
-                self.changeColor(self.signal_id)
+                self.changeColor(self.signal_id,self.Channel1Viewer)
 
             elif control == "polar":
-                self.show_polar_view(self.signal_id)
+                self.show_polar_view(self.signal_id,self.Channel1Viewer)
 
             elif control == "show/hide":
                 self.show_OR_hide_signal(self.signal_id, state, self.Channel1Viewer)
 
             elif control == "move_signal":
                 print("iam in the control of move signal")
-                self.moveSignal(self.signal_id)
+                self.moveSignal(self.signal_id, "channel 1")
                 self.PlayChannel2.setIcon(self.iconpause)
 
 
         if channel == "channel 2":
-            current_index = self.signalEditor2.SignalComboBox.currentIndex()
+            self.signal_id = self.signalEditor2.SignalComboBox.currentIndex()
 
-            if current_index == -1:  # No item selected
+            if self.signal_id == -1:  # No item selected
                 return
 
-            self.signal_id = self.signalEditor2.SignalComboBox.itemData(current_index)
-            selected_signal_text = self.signalEditor2.SignalComboBox.currentText()
-
+            selected_signal_text = self.signalEditor1.SignalComboBox.currentText()
             print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
+
+            if control == "rename":
+                self.rename(self.signal_id,"channel 2")
+
+            elif control == "color":
+                self.changeColor(self.signal_id,self.Channel2Viewer)
+
+            elif control == "polar":
+                self.show_polar_view(self.signal_id,self.Channel2Viewer)
 
             if control == "show/hide":
                 self.show_OR_hide_signal(self.signal_id, state, self.Channel2Viewer)
+            
+            elif control == "move_signal":
+                print("iam in the control of move signal")
+                self.moveSignal(self.signal_id,"channel 2")
+                self.PlayChannel1.setIcon(self.iconpause)
 
 
 
     def createSignalEditor(self):
-
-        signal = self.Channel1Viewer.uploadSignal()
+        
+        signalCount, signal = self.Channel1Viewer.uploadSignal(self.signalCount)
         if signal is not None:
-            self.signal_id += 1
-            self.signalEditorID += 1
+            self.signalCount = signalCount
             self.signals.append(signal)
             self.PlayChannel1.setIcon(self.iconpause)
 
-            new_signal_label = f"Signal {self.signal_id}"
+            new_signal_label = f"signal {self.signalCount}"
 
             # Add the new signal to the combo box with its signalId as itemData
-            self.signalEditor1.SignalComboBox.addItem(new_signal_label, self.signal_id)
+            self.signalEditor1.SignalComboBox.addItem(new_signal_label, self.signalCount)
 
 
 
@@ -558,51 +578,94 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         return signals_checked_id
     def get_signal_by_id(self,id,channelViewer):
         for signal in channelViewer.signalsChannel :
-            if signal.signalId == id:
+            if signal.signalId - 1 == id:
                 return signal
 
     def show_OR_hide_signal(self, id, state, channelViewer):
-        if state == Qt.Unchecked:  # un checked so make it hide
+        if state == Qt.Checked:  # checked, so hide the signal
             for signal in channelViewer.signalsChannel:
+                
                 if signal.signalId == id:
-                    channelViewer.plot_graph.removeItem(signal.line)  # remove from ch 1
+                    channelViewer.plot_graph.removeItem(signal.line)  # remove from plot
                     signal.showSignal = False
                     break
-        elif state == Qt.Checked:  # checked so reshow it
+        elif state == Qt.Unchecked:  # unchecked, so show the signal
             for signal in channelViewer.signalsChannel:
                 if signal.signalId == id and signal.line not in channelViewer.plot_graph.listDataItems():
-                    signal.line.setData(signal.time, signal.magnitude)  # reshow the signal
-                    channelViewer.plot_graph.addItem(signal.line)  # readd to the plot
+                    signal.line.setData(signal.time, signal.magnitude)  # update signal data
+                    channelViewer.plot_graph.addItem(signal.line)  # add to the plot
                     signal.showSignal = True
                     break
 
-    def moveSignal(self, id):
+
+    def moveSignal(self, id, channel):
         print("iam in the move signal button")
         signalRelated2Id = None
+        
       # if i clicked move so i want to move
-        for signal in self.Channel2Viewer.signalsChannel:
-            if signal.signalId == id and signal.line not in self.Channel2Viewer.plot_graph.listDataItems():  # then it was existed so we need to reshoe
-                signal.line.setData(signal.time, signal.magnitude)  # reshow the signal in Plot
-                signal.showSignal = True
+        # for signal in self.Channel2Viewer.signalsChannel:
+        #         if signal.name == self.signalEditor2.SignalComboBox.itemText(id):
+        #     # if signal.signalId == id and signal.line not in self.Channel2Viewer.plot_graph.listDataItems():  # then it was existed so we need to reshoe
+        #     #     signal.line.setData(signal.time, signal.magnitude)  # reshow the signal in Plot
+        #     #     signal.showSignal = True
+        #     #     self.Channel2Viewer.plot_graph.addItem(signal.line)
+        #             return
+        #         print(self.signalEditor1.SignalComboBox.findText("Signal 3"))
+        #         print(id)
+
+        if channel == "channel 1":
+            for i, signal in enumerate(self.Channel1Viewer.signalsChannel):  # here there is no id with that , so we need to create new signal object
+                if i == id:
+                    print(id)
+                    self.Channel1Viewer.signalsChannel.pop(i)
+                    # self.signals.pop(i)
+                    self.signalEditor1.SignalComboBox.removeItem(id)
+                    self.Channel1Viewer.plot_graph.removeItem(signal.line)  # remove from ch 1
+                    signal.showSignal = False
+                    self.signalEditor1.SignalComboBox.update()
+                    signalRelated2Id = signal
+                    break
+            if signalRelated2Id is not None:
+                signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, (self.Channel2Viewer).plot_graph,
+                                        signalRelated2Id.color,
+                                        signalRelated2Id.name, id)
                 self.Channel2Viewer.plot_graph.addItem(signal.line)
-                return
-        for signal in self.Channel1Viewer.signalsChannel:  # here there is no id with that , so we need to create new signal object
-            if signal.signalId == id:
-                signalRelated2Id = signal
-                break
-        if signalRelated2Id is not None:
-            signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, (self.Channel2Viewer).plot_graph,
-                                  signalRelated2Id.color,
-                                  signalRelated2Id.name, id)
-            self.Channel2Viewer.plot_graph.addItem(signal.line)
-            self.Channel2Viewer.signalsChannel.append(signal)
-            self.signals.append(signal)
-            signal.showSignal = True
-            self.signalEditor2.SignalComboBox.addItem(signalRelated2Id.name, self.signal_id)
-            yMin, yMax = min(signalRelated2Id.y), max(signalRelated2Id.y)
-            self.Channel2Viewer.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin,
-                                                                 yMax=yMax)
-            self.Channel2Viewer.playSignal()
+                self.Channel2Viewer.signalsChannel.append(signal)
+                self.signals.append(signal)
+                signal.showSignal = True
+                self.signalEditor2.SignalComboBox.addItem(signalRelated2Id.name, self.signal_id)
+                yMin, yMax = min(signalRelated2Id.y), max(signalRelated2Id.y)
+                self.Channel2Viewer.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin,
+                                                                        yMax=yMax)
+                self.Channel2Viewer.playSignal()
+
+
+        if channel == "channel 2":
+            for i, signal in enumerate(self.Channel2Viewer.signalsChannel):  # here there is no id with that , so we need to create new signal object
+                if i == id:
+                    print(id)
+                    self.Channel2Viewer.signalsChannel.pop(i)
+                    # self.signals.pop(i)
+                    self.signalEditor2.SignalComboBox.removeItem(id)
+                    self.Channel2Viewer.plot_graph.removeItem(signal.line)  # remove from ch 1
+                    signal.showSignal = False
+                    self.signalEditor2.SignalComboBox.update()
+                    print(self.Channel2Viewer.plot_graph.listDataItems())
+                    signalRelated2Id = signal
+                    break
+            if signalRelated2Id is not None:
+                signal = SignalObject(signalRelated2Id.x, signalRelated2Id.y, (self.Channel1Viewer).plot_graph,
+                                        signalRelated2Id.color,
+                                        signalRelated2Id.name, id)
+                self.Channel1Viewer.plot_graph.addItem(signal.line)
+                self.Channel1Viewer.signalsChannel.append(signal)
+                self.signals.append(signal)
+                signal.showSignal = True
+                self.signalEditor1.SignalComboBox.addItem(signalRelated2Id.name, self.signal_id)
+                yMin, yMax = min(signalRelated2Id.y), max(signalRelated2Id.y)
+                self.Channel1Viewer.plot_graph.plotItem.vb.setLimits(xMin=0, xMax=signalRelated2Id.x[-1], yMin=yMin,
+                                                                        yMax=yMax)
+                self.Channel1Viewer.playSignal()
 
         # else:  # ch2 2 is unchecked
         #     self.PlayChannel2.setIcon(self.iconplay)
@@ -612,61 +675,56 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         #             signal.showSignal = False
         #             break
 
-    def rename(self, signalEditorId):
+    def rename(self, signalEditorId, channel):
         entered_text = None
         print(signalEditorId)
-        # Update Channel 1 signals
-        for signal in self.Channel1Viewer.signalsChannel:
-            if signal.signalId == signalEditorId:
-                entered_text = self.signalEditor1.renameTextField.text()
-                if entered_text.strip():
-                    signal.name = entered_text
+        if channel == "channel 1":
+            for i, signal in enumerate(self.Channel1Viewer.signalsChannel):
+                if i == signalEditorId:
+                    entered_text = self.signalEditor1.renameTextField.text()
+                    if entered_text.strip():
+                        signal.name = entered_text
+                        self.signalEditor1.SignalComboBox.setItemText(i, entered_text)
+                        signal.rename_signal(entered_text)
 
-                    # Find the corresponding item in the ComboBox
-                    for i in range(self.signalEditor1.SignalComboBox.count()):
-                        if self.signalEditor1.SignalComboBox.itemData(i) == signal.signalId:
-                            self.signalEditor1.SignalComboBox.setItemText(i, entered_text)
-                            signal.rename_signal(entered_text)
-                            break
+        if channel == "channel 2":
+            for i, signal in enumerate(self.Channel2Viewer.signalsChannel):
+                if i == signalEditorId:
+                    entered_text = self.signalEditor2.renameTextField.text()
+                    if entered_text.strip():
+                        signal.name = entered_text
+                        self.signalEditor2.SignalComboBox.setItemText(i, entered_text)
+                        signal.rename_signal(entered_text)
 
-        # Update Channel 2 signals
-        for signal in self.Channel2Viewer.signalsChannel:
-            if signal.signalId == signalEditorId:
-                entered_text = self.signalEditor2.renameTextField.text()
-                if entered_text.strip():
-                    signal.label = entered_text
 
-                    # Find the corresponding item in the ComboBox
-                    for i in range(self.signalEditor2.SignalComboBox.count()):
-                        if self.signalEditor2.SignalComboBox.itemData(i) == signal.signalId:
-                            self.signalEditor2.SignalComboBox.setItemText(i, entered_text)
-                            signal.rename_signal(entered_text)
-                            break
-
-    def changeColor(self,signalEditorID):
+    def changeColor(self,signalEditorID, channel):
                 color = QColorDialog.getColor()
                 
                 if color.isValid():
                         signal = None
                         # Apply the selected color to the signal
-                        for signal in self.signals:
-                               if signal.signalId == signalEditorID:
+                        for i,signal in enumerate(channel.signalsChannel):
+                               if i == signalEditorID:
                                       signal.color = color
                                       signal.change_color(color)
                                       break
 
-    def refillSignal (self, channel):
-        if channel == "channel 1":
-            self.signalEditor1.SignalComboBox.clear()
-            for signal in self.Channel1Viewer.signalsChannel:
-                self.signalEditor1.SignalComboBox.addItem(signal.name,self.signal_id)
+    # def refillSignal (self, channel):
+    #     if channel == "channel 1":
+    #         self.signalEditor1.SignalComboBox.clear()
+    #         for signal in self.Channel1Viewer.signalsChannel:
+    #             self.signalEditor1.SignalComboBox.addItem(signal.name,self.signal_id)
+    #     if channel == "channel 1":
+    #         self.signalEditor2.SignalComboBox.clear()
+    #         for signal in self.Channel1Viewer.signalsChannel:
+    #             self.signalEditor2.SignalComboBox.addItem(signal.name,self.signal_id)
 
 
     # NADA'S ADDITION
-    def show_polar_view(self, signalID):
+    def show_polar_view(self, signalID,channel):
         print(signalID)
-        for signal in self.signals:
-            if signal.signalId == signalID:
+        for i,signal in enumerate(channel.signalsChannel):
+            if i == signalID:
                 try:
                     signal_window = PolarWindow(signal.x, signal.y, signal.name, signal.color)
                     signal_window.show()
