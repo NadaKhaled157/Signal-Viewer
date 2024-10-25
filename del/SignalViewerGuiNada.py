@@ -18,7 +18,7 @@ from SignalEditWindow import SignalEditor
 from main import *
 from PolarSignal import PolarWindow
 from LiveSignal import DataFetcher
-from ExportToPdf import ExportToPdf
+from ExportToPdfOld import ExportToPdf
 import time
 import threading
 

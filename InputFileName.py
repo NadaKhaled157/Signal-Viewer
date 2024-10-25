@@ -42,7 +42,7 @@ class InputFileName(QDialog):
         self.move(qr.topLeft())
 
     def on_save(self):
-        pdf = ExportToPdf(self.signal_one_statistics, self.signal_two_statistics, self.glued_signal_values, self.all_glued_signals, self.glued_images_count)
+        pdf = ExportToPdf(self.signal_one_statistics, self.signal_two_statistics, self.all_glued_signals, self.glued_images_count)
         self.file_name = self.textbox.text()
         if not self.file_name.endswith('.pdf'):
             self.file_name += '.pdf'

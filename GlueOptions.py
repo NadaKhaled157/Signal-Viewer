@@ -14,8 +14,8 @@ class GlueOptions(QDialog):
         self.portion_y2 = portiony2
         self.interpolation_order = "linear"
         self.gluedSignals = gluedSignals
-        self.glued_count = 0
-        self.glued_lists = []
+        # self.glued_count = 0
+        # self.glued_lists = []
         self.glued_x = []
         self.glued_y = []
         self.setStyleSheet("background-color: #181818;")
@@ -250,7 +250,7 @@ class GlueOptions(QDialog):
 
     def save_glue(self, glued_plot_image):
         save_image(glued_plot_image)
-        self.glued_count = self.glued_count + 1
+        self.main_window.glued_count = self.main_window.glued_count + 1
         print("Glue Image Saved")
 
     def showGluedSignal(self):
@@ -266,7 +266,12 @@ class GlueOptions(QDialog):
         self.glued_y = self.glued_y[0: size]
         self.plot_graph_glued_signal.clear()
         self.plot_graph_glued_signal.plot(self.glued_x, self.glued_y, pen=pg.mkPen(color="green", width=2.5))
-        self.glued_lists.append(self.glued_y)
+        # self.glued_lists.append(self.glued_y)
+        self.main_window.all_channel_one_signals.append(self.main_window.toBeGluedSignals[0])
+        print(f"first signal:{self.main_window.toBeGluedSignals[0]}")
+        self.main_window.all_channel_two_signals.append(self.main_window.toBeGluedSignals[1])
+        print(f"second signal:{self.main_window.toBeGluedSignals[1]}")
+        self.main_window.all_glued_signals.append(self.glued_y)
 
     def gap_or_overlap(self, range, begin, end):
         gap = False

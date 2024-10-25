@@ -11,6 +11,10 @@ class MyMainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.glue_window = None
+        self.all_channel_one_signals = []
+        self.all_channel_two_signals = []
+        self.all_glued_signals = []
+        self.glued_count = 0
         print("UI setup complete")  # Add this line
         if hasattr(self.ui, 'glueButton'):
             print("Glue button exists")  # Add this line

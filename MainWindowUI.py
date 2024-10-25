@@ -214,9 +214,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                         "font-weight:800;")
 
         self.ExportButton.clicked.connect(
-            lambda: self.enter_file_name(MainWindow.toBeGluedSignals[0], MainWindow.toBeGluedSignals[1],
-                                         MainWindow.glue_window.glued_y, MainWindow.glue_window.glued_lists,
-                                         MainWindow.glue_window.glued_count))
+            lambda: self.enter_file_name(MainWindow.all_channel_one_signals, MainWindow.all_channel_two_signals,
+                                         MainWindow.glue_window.glued_y, MainWindow.all_glued_signals,
+                                         MainWindow.glued_count))
         icon7 = QtGui.QIcon()
         icon7.addPixmap(QtGui.QPixmap("Deliverables/share (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ExportButton.setIcon(icon7)
@@ -727,7 +727,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     #         pdf = ExportToPdf(signal_one_statistics, signal_two_statistics, glued_plot)
     def enter_file_name(self, signal_one, signal_two, glued_signal_values, glued_lists, glued_count):
         print("inside enter file name")
-        dialog = InputFileName(signal_one.signalStatistics(), signal_two.signalStatistics(), glued_signal_values,
+        dialog = InputFileName(signal_one, signal_two, glued_signal_values,
                                glued_lists, glued_count)
         if dialog.exec_():
             print("Saving File")
