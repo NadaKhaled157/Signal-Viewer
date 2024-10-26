@@ -40,6 +40,7 @@ class MyMainWindow(QMainWindow):
         self.capture_button.hide()
 
         self.delete_button = QPushButton("delete", self)
+        self.delete_button.setStyleSheet("background-color:gray; border-radius:20px; color:white;")
         self.delete_button.clicked.connect(self.delete_rectangle)
         self.delete_button.hide()
     def mousePressEvent(self, event):
@@ -155,11 +156,13 @@ class MyMainWindow(QMainWindow):
                 print("Portions are available")
                 self.glue_window = GlueOptions(self.portion_x1, self.portion_y1, self.portion_x2, self.portion_y2,
                                           self.toBeGluedSignals, self)
+                self.toBeGluedSignals = []
                 self.glue_window.finished.connect(self.delete_all_rectangles)
 
                 self.glue_window.exec_()
 
             self.update()
+
     def delete_rectangle(self):
         if self.selected_rect is not None:
             rect_frame, captured = self.rectangles[self.selected_rect]
@@ -192,7 +195,7 @@ class MyMainWindow(QMainWindow):
         signals_checked_id = self.ui.get_checked_signal_id(current_viewer)
         print(signals_checked_id)
         # signal = None
-        if len(signals_checked_id) == 1 :
+        if len(signals_checked_id) == 1:
             signal = self.ui.get_signal_by_id(signals_checked_id[0], current_viewer)
             self.toBeGluedSignals.append(signal)
             signal_xdata = signal.x

@@ -6,11 +6,11 @@ from ExportToPdf import ExportToPdf
 
 
 class InputFileName(QDialog):
-    def __init__(self, signal_one_statistics, signal_two_statistics, glued_signal_values, all_glued_signals, glued_images_count):
+    def __init__(self, signal_one_statistics, signal_two_statistics, all_glued_signals, glued_images_count):
         self.signal_one_statistics = signal_one_statistics
         self.signal_two_statistics = signal_two_statistics
-        self.glued_signal_values = glued_signal_values
-        self.all_glued_signals = glued_signal_values
+        self.glued_signal_values = all_glued_signals
+        self.all_glued_signals = all_glued_signals
         self.glued_images_count = glued_images_count
         super().__init__()
         self.init_ui()

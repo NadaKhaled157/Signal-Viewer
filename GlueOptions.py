@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QIcon
 from ExportToPdf import save_image
 class GlueOptions(QDialog):
-    def __init__(self, portionx1, portiony1, portionx2, portiony2,gluedSignals, main_window):
+    def __init__(self, portionx1, portiony1, portionx2, portiony2, gluedSignals, main_window):
         super().__init__()
         self.main_window = main_window
         self.setWindowTitle("Signal Glue")
@@ -130,8 +130,17 @@ class GlueOptions(QDialog):
         # Set the default shift amount
         self.shift_amount = 0.01
         self.combo_order.currentIndexChanged.connect(self.showGluedSignal)
-        self.intial_glue_x , self.intial_glue_y = self.signal_glue(self.portion_x1, self.portion_y1,self.portion_x2, self.portion_y2, self.interpolation_order)
-        self.plot_graph_glued_signal.plot(self.intial_glue_x, self.intial_glue_y, pen=pg.mkPen(color="green", width=2.5))
+        self.initial_glue_x , self.initial_glue_y = self.signal_glue(self.portion_x1, self.portion_y1,self.portion_x2, self.portion_y2, self.interpolation_order)
+        self.plot_graph_glued_signal.plot(self.initial_glue_x, self.initial_glue_y, pen=pg.mkPen(color="green", width=2.5))
+
+        # # Storing for export
+        # self.main_window.all_channel_one_signals.append(self.main_window.toBeGluedSignals[0].signalStatistics())
+        # print(f"first signal:{self.main_window.toBeGluedSignals[0].signalStatistics()}")
+        # self.main_window.all_channel_two_signals.append(self.main_window.toBeGluedSignals[1].signalStatistics())
+        # print(f"second signal:{self.main_window.toBeGluedSignals[1].signalStatistics()}")
+        # self.main_window.all_glued_signals.append(self.initial_glue_y)
+        # print(f"ALL CH1 STATS: {self.main_window.all_channel_one_signals}")
+        # print(f"ALL CH2 STATS: {self.main_window.all_channel_two_signals}")
 
 
     def shiftRightSignal2(self):
@@ -251,6 +260,18 @@ class GlueOptions(QDialog):
     def save_glue(self, glued_plot_image):
         save_image(glued_plot_image)
         self.main_window.glued_count = self.main_window.glued_count + 1
+        self.main_window.all_channel_one_signals.append(self.gluedSignals[0].signalStatistics())
+        self.main_window.all_channel_two_signals.append(self.gluedSignals[1].signalStatistics())
+        self.main_window.all_glued_signals.append(self.glued_y)
+
+
+        print(f"first signal:{self.gluedSignals[0].signalStatistics()}")
+        print(f"second signal:{self.gluedSignals[1].signalStatistics()}")
+
+        # print(f"ALL CH1 STATS: {self.main_window.all_channel_one_signals}")
+        # print(f"ALL CH2 STATS: {self.main_window.all_channel_two_signals}")
+        print(f"All CH1 Stats Size:{len(self.main_window.all_channel_one_signals)}")
+        print(f"All CH2 Stats Size:{len(self.main_window.all_channel_two_signals)}")
         print("Glue Image Saved")
 
     def showGluedSignal(self):
@@ -267,12 +288,13 @@ class GlueOptions(QDialog):
         self.plot_graph_glued_signal.clear()
         self.plot_graph_glued_signal.plot(self.glued_x, self.glued_y, pen=pg.mkPen(color="green", width=2.5))
         # self.glued_lists.append(self.glued_y)
-        self.main_window.all_channel_one_signals.append(self.main_window.toBeGluedSignals[0])
-        print(f"first signal:{self.main_window.toBeGluedSignals[0]}")
-        self.main_window.all_channel_two_signals.append(self.main_window.toBeGluedSignals[1])
-        print(f"second signal:{self.main_window.toBeGluedSignals[1]}")
-        self.main_window.all_glued_signals.append(self.glued_y)
-
+        # self.main_window.all_channel_one_signals.append(self.main_window.toBeGluedSignals[0].signalStatistics())
+        # print(f"first signal:{self.main_window.toBeGluedSignals[0].signalStatistics()}")
+        # self.main_window.all_channel_two_signals.append(self.main_window.toBeGluedSignals[1].signalStatistics())
+        # print(f"second signal:{self.main_window.toBeGluedSignals[1].signalStatistics()}")
+        # self.main_window.all_glued_signals.append(self.glued_y)
+        # print(f"ALL CH1 STATS: {self.main_window.all_channel_one_signals}")
+        # print(f"ALL CH2 STATS: {self.main_window.all_channel_two_signals}")
     def gap_or_overlap(self, range, begin, end):
         gap = False
         if abs(end - begin) >= range:

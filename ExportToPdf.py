@@ -22,15 +22,18 @@ class ExportToPdf(FPDF):
                  glued_images_count):
         super().__init__()
         # self.first_page = True
-        self.all_channel_one_signal_stats = [all_channel_one_signals[i].signalStatistics()
-                                             for i in range(0, len(all_channel_one_signals))]
-        self.all_channel_one_signal_stats = np.array(self.all_channel_one_signal_stats)
-        self.all_channel_two_signal_stats = [all_channel_two_signals[i].signalStatistics()
-                                             for i in range(0, len(all_channel_one_signals))]
-        self.all_channel_two_signal_stats = np.array(self.all_channel_two_signal_stats)
+        # self.all_channel_one_signal_stats = [all_channel_one_signals[i].signalStatistics()
+        #                                      for i in range(0, len(all_channel_one_signals))]
+        # self.all_channel_one_signal_stats = np.array(self.all_channel_one_signal_stats)
+        # self.all_channel_two_signal_stats = [all_channel_two_signals[i].signalStatistics()
+        #                                      for i in range(0, len(all_channel_one_signals))]
+        # self.all_channel_two_signal_stats = np.array(self.all_channel_two_signal_stats)
 
-        print(f"ALL CH1 STATS: {self.all_channel_one_signal_stats}")
-        print(f"ALL CH2 STATS: {self.all_channel_two_signal_stats}")
+        self.all_channel_one_signal_stats = all_channel_one_signals
+        self.all_channel_two_signal_stats = all_channel_two_signals
+
+        # print(f"ALL CH1 STATS: {self.all_channel_one_signal_stats}")
+        # print(f"ALL CH2 STATS: {self.all_channel_two_signal_stats}")
         self.all_glued_signals = all_glued_signals
         self.glued_images_count = glued_images_count
         self.pages_count = 1
@@ -50,25 +53,25 @@ class ExportToPdf(FPDF):
             self.pages_count += 1
             # Formatting original signal statistics
             signal_one_stats = {
-                "Mean": round(np.mean(self.all_channel_one_signal_stats[i][0]), 3),
-                "Median": np.median(self.all_channel_one_signal_stats[i][1]),
-                "STD": np.std(self.all_channel_one_signal_stats[i][2]),
-                "MIN": np.min(self.all_channel_one_signal_stats[i][3]),
-                "MAX": np.max(self.all_channel_one_signal_stats[i][4])
+                "Mean": round(self.all_channel_one_signal_stats[i][0], 3),
+                "Median": round(self.all_channel_one_signal_stats[i][1], 3),
+                "STD": round(self.all_channel_one_signal_stats[i][2], 3),
+                "MIN": round(self.all_channel_one_signal_stats[i][3], 3),
+                "MAX": round(self.all_channel_one_signal_stats[i][4], 3),
             }
             signal_two_stats = {
-                "Mean": round(np.mean(self.all_channel_two_signal_stats[i][0]), 3),
-                "Median": np.median(self.all_channel_two_signal_stats[i][1]),
-                "STD": np.std(self.all_channel_two_signal_stats[i][2]),
-                "MIN": np.min(self.all_channel_two_signal_stats[i][3]),
-                "MAX": np.max(self.all_channel_two_signal_stats[i][4])
+                "Mean": round(self.all_channel_two_signal_stats[i][0], 3),
+                "Median": round(self.all_channel_two_signal_stats[i][1], 3),
+                "STD": round(self.all_channel_two_signal_stats[i][2], 3),
+                "MIN": round(self.all_channel_two_signal_stats[i][3], 3),
+                "MAX": round(self.all_channel_two_signal_stats[i][4], 3),
             }
             glued_signal_stats = {
                 "Mean": round(np.mean(self.all_glued_signals[i]), 3),
-                "Median": np.median(self.all_glued_signals[i]),
-                "STD": np.std(self.all_glued_signals[i]),
-                "MIN": np.min(self.all_glued_signals[i]),
-                "MAX": np.max(self.all_glued_signals[i])
+                "Median": round(np.median(self.all_glued_signals[i]), 3),
+                "STD": round(np.std(self.all_glued_signals[i]), 3),
+                "MIN": round(np.min(self.all_glued_signals[i]), 3),
+                "MAX": round(np.max(self.all_glued_signals[i]), 3)
             }
             self.statistics_table(signal_one_stats, title="Signal One Statistics")
             self.statistics_table(signal_two_stats, title="Signal Two Statistics")
