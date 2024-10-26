@@ -324,6 +324,34 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        # track the state of the check boxes
+        self.signalEditor1.showHideCheckbox.setChecked(False)  # Unchecked by default
+        self.signalEditor2.showHideCheckbox.setChecked(False)
+        self.signalEditor1.SignalComboBox.currentIndexChanged.connect(lambda: self.updateSignalEditor("channel 1"))
+        self.signalEditor2.SignalComboBox.currentIndexChanged.connect(lambda: self.updateSignalEditor("channel 2"))
+
+    def updateSignalEditor(self, channel):
+        if channel == "channel 1":
+            self.signal_id = self.signalEditor1.SignalComboBox.currentIndex()
+            if self.signal_id != -1:
+                signal = self.get_signal_by_id(self.signal_id, self.Channel1Viewer)
+                if signal:
+                    self.signalEditor1.showHideCheckbox.setChecked(not(signal.showSignal))  # Set based on the signal showing "inverse"
+                    self.signalEditor1.renameTextField.setText(signal.name)
+
+                else:
+                    self.signalEditor1.showHideCheckbox.setChecked(False) # else false by default
+
+        elif channel == "channel 2":
+            self.signal_id = self.signalEditor2.SignalComboBox.currentIndex()
+            if self.signal_id != -1:
+                signal = self.get_signal_by_id(self.signal_id, self.Channel2Viewer)
+                if signal:
+                    self.signalEditor2.showHideCheckbox.setChecked(not(signal.showSignal))
+                    self.signalEditor2.renameTextField.setText(signal.name)
+
+                else:
+                    self.signalEditor2.showHideCheckbox.setChecked(False)
     def temp_glue_function(self):
         print("iam the clicked that in the ui main window")
 
@@ -493,7 +521,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             selected_signal_text = self.signalEditor1.SignalComboBox.currentText()
             print(f"Selected Item: {selected_signal_text}, Signal ID: {self.signal_id}")
 
-            
+
             if control == "rename":
                 self.rename(self.signal_id,"channel 1")
 
@@ -555,53 +583,64 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 
 
-            
-            
-            
-        
+
 
     def get_checked_signal_id(self, channelViewer):
         signals_checked_id = []
-
-        # Determine which channel we are checking
-        if channelViewer == self.Channel1Viewer:
-            for i in range(self.signalEditor1.SignalComboBox.count()):
-                if self.signalEditor1.showHideCheckbox.isChecked():
-                    signal_id = self.signalEditor1.SignalComboBox.itemData(i)
-                    signals_checked_id.append(signal_id)
-        elif channelViewer == self.Channel2Viewer:
-            for i in range(self.signalEditor2.SignalComboBox.count()):
-                if self.signalEditor2.showHideCheckbox.isChecked():
-                    signal_id = self.signalEditor2.SignalComboBox.itemData(i)
-                    signals_checked_id.append(signal_id)
-
+        for signal in channelViewer.signalsChannel:
+            if signal.showSignal :
+                signals_checked_id.append(signal.signalId)
         return signals_checked_id
+
+
+    # def get_checked_signal_id(self, channelViewer):
+    #     signals_checked_id = []
+    #     if channelViewer == self.Channel1Viewer:
+    #         for i in range(self.signalEditor1.SignalComboBox.count()) :
+    #             if self.signalEditor1.showHideCheckbox.isChecked()==False:
+    #                 signal_id = self.signalEditor1.SignalComboBox.itemData(i)
+    #                 signals_checked_id.append(signal_id)
+    #     elif channelViewer == self.Channel2Viewer:
+    #         for i in range(self.signalEditor2.SignalComboBox.count()):
+    #             if self.signalEditor2.showHideCheckbox.isChecked()==False :
+    #                 signal_id = self.signalEditor2.SignalComboBox.itemData(i)
+    #                 signals_checked_id.append(signal_id)
+    #
+    #     return signals_checked_id
     def get_signal_by_id(self,id,channelViewer):
         for signal in channelViewer.signalsChannel :
-            if signal.signalId - 1 == id:
+            if signal.signalId  == id:
                 return signal
 
     def show_OR_hide_signal(self, id, state, channelViewer):
+        print(f"Toggling visibility for signal ID: {id} State: {state}")
         if state == Qt.Checked:  # checked, so hide the signal
+            print("iam here after if condition")
             for signal in channelViewer.signalsChannel:
-                
+                print(f"iam here after for loop and this signal has id {signal.signalId}")
                 if signal.signalId == id:
+                    print(f"Hiding signal: {signal.signalId}")
                     channelViewer.plot_graph.removeItem(signal.line)  # remove from plot
                     signal.showSignal = False
+                    channelViewer.plot_graph.update()
+                    channelViewer.plot_graph.repaint()
                     break
         elif state == Qt.Unchecked:  # unchecked, so show the signal
             for signal in channelViewer.signalsChannel:
                 if signal.signalId == id and signal.line not in channelViewer.plot_graph.listDataItems():
+                    print(f"Showing signal: {signal.name}")
                     signal.line.setData(signal.time, signal.magnitude)  # update signal data
                     channelViewer.plot_graph.addItem(signal.line)  # add to the plot
                     signal.showSignal = True
+                    channelViewer.plot_graph.update()
+                    channelViewer.plot_graph.repaint()
                     break
 
 
     def moveSignal(self, id, channel):
         print("iam in the move signal button")
         signalRelated2Id = None
-        
+
       # if i clicked move so i want to move
         # for signal in self.Channel2Viewer.signalsChannel:
         #         if signal.name == self.signalEditor2.SignalComboBox.itemText(id):

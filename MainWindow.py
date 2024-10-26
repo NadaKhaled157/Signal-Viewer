@@ -190,9 +190,24 @@ class MyMainWindow(QMainWindow):
                 max_new_range_x_axis - min_new_range_x_axis) + min_new_range_x_axis
 
         signals_checked_id = self.ui.get_checked_signal_id(current_viewer)
-        signal = None
+        print(signals_checked_id)
+        # signal = None
         if len(signals_checked_id) == 1 :
             signal = self.ui.get_signal_by_id(signals_checked_id[0], current_viewer)
+            self.toBeGluedSignals.append(signal)
+            signal_xdata = signal.x
+            signal_ydata = signal.y
+            initial_index, final_index = 0, 0
+            for i, pnt in enumerate(signal_xdata):
+                if pnt >= mapped_x1_rect and not initial_index:
+                    initial_index = i
+                if pnt >= mapped_x2_rect:
+                    final_index = i
+                    break
+            portion_datax = signal_xdata[initial_index: final_index]
+            portion_datay = signal_ydata[initial_index: final_index]
+            print(f" inter end{portion_datax[-1]}, begin {portion_datax[0]}")
+            return portion_datax, portion_datay
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
@@ -203,20 +218,20 @@ class MyMainWindow(QMainWindow):
             msg.exec_()
             self.delete_rectangle()
             return [], []
-        self.toBeGluedSignals.append(signal)
-        signal_xdata = signal.x
-        signal_ydata = signal.y
-        initial_index, final_index = 0, 0
-        for i, pnt in enumerate(signal_xdata):
-            if pnt >= mapped_x1_rect and not initial_index:
-                initial_index = i
-            if pnt >= mapped_x2_rect:
-                final_index = i
-                break
-        portion_datax = signal_xdata[initial_index: final_index]
-        portion_datay = signal_ydata[initial_index: final_index]
-        print(f" inter end{portion_datax[-1]}, begin {portion_datax[0]}")
-        return portion_datax , portion_datay
+        # self.toBeGluedSignals.append(signal)
+        # signal_xdata = signal.x
+        # signal_ydata = signal.y
+        # initial_index, final_index = 0, 0
+        # for i, pnt in enumerate(signal_xdata):
+        #     if pnt >= mapped_x1_rect and not initial_index:
+        #         initial_index = i
+        #     if pnt >= mapped_x2_rect:
+        #         final_index = i
+        #         break
+        # portion_datax = signal_xdata[initial_index: final_index]
+        # portion_datay = signal_ydata[initial_index: final_index]
+        # print(f" inter end{portion_datax[-1]}, begin {portion_datax[0]}")
+        # return portion_datax , portion_datay
 
     def glue_options(self):
         self.allow_drawing = True

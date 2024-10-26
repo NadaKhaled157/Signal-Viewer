@@ -135,7 +135,6 @@ class SignalCine(QtWidgets.QFrame):
         for signal in self.signalsChannel:
             signal.update()
         self.plot_graph.update()
-
     def uploadSignal(self, signalCount):
         print("Button clicked")
         x, y = self.open_file()
@@ -145,9 +144,9 @@ class SignalCine(QtWidgets.QFrame):
             while color in self.used_color:
                 color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             self.used_color.add(color)
-            self.signalId += 1
             signal = SignalObject(x, y, self.plot_graph, color, f"signal {signalCount}", self.signalId)
             self.signalsChannel.append(signal)
+            self.signalId += 1
 
             # Set the scroll bar conditions
             self.scrollBarHorizontal.setRange(0, len(x) - 401)
