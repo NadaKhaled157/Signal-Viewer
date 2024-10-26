@@ -238,23 +238,28 @@ class GlueOptions(QDialog):
                     [portion_y2[:initial_index], y_interp, portion_y1[final_index:]])
                 return self.glued_x, self.glued_y
 
-    def x_interp(self, x, y):
-        intersection = set(x) & set(y)
+    def x_interp(self, portion_x1, portion_x2):
+        intersection = set(portion_x1) & set(portion_x2)
         print(intersection)
+
+        if not intersection:
+            print("no intersection found")
+            return [], 0, 0
+
         initial_index = 0
         final_index = 0
 
-        for i, val in enumerate(x):
+        for i, val in enumerate(portion_x1):
             if val == min(intersection):
                 initial_index = i
                 break
 
-        for i, val in enumerate(y):
+        for i, val in enumerate(portion_x2):
             if val == max(intersection):
                 final_index = i
                 break
 
-        x_list = set(x[initial_index:] + y[:final_index])
+        x_list = np.linspace(portion_x1[initial_index], portion_x2[final_index], 1000).tolist()
         return sorted(x_list), initial_index, final_index
 
     def save_glue(self, glued_plot_image):
