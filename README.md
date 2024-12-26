@@ -10,6 +10,9 @@
 *   The application also includes a non-rectangular graph for displaying signals in polar view.
 *   All signals are displayed in cine mode (running signal through time).
 
+## Live Signal
+User can connect to real-time subscriber count website and visualize the fluctuation in their favourite youtuber's subscriber count.
+
 ## Signal Manipulation:
 
 *   Users can manipulate signals using UI elements, including:
