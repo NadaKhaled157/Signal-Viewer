@@ -46,8 +46,6 @@ The application distinguishes between two types of signal display modes:
 
 ---
 
-This project provides a comprehensive and intuitive toolset for viewing, manipulating, and analyzing various biosignals, designed with both medical professionals and researchers in mind. It ensures a seamless user experience, whether handling real-time signals or conducting detailed signal analysis.
----
 
 
 
