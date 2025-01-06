@@ -2,9 +2,9 @@
 
 This project is a multi-port, multi-channel signal viewer developed using Python and Qt. It is designed to allow users to load, visualize, and manipulate various biosignals in real-time. The application provides powerful tools for signal viewing, manipulation, gluing, and exporting, tailored to both rectangular and polar views.
 
-## Features
+## Features 🛠️
 
-### Signal Viewing
+### Signal Viewing 🖥️
 
 - **File and Real-time Signal Access**: Users can open signal files from their local system or connect to live websites that emit real-time signals.
 - **Multiple Graphs**: The application supports two identical graphs that can display different signals simultaneously.
@@ -12,11 +12,11 @@ This project is a multi-port, multi-channel signal viewer developed using Python
 - **Polar Graphs**: A non-rectangular graph is available for displaying signals in polar view.
 - **Cine Mode**: All signals are displayed in cine mode, enabling users to view signals running through time.
 
-### Live Signal Monitoring
+### Live Signal Monitoring 📡
 
 - Users can connect to real-time websites (e.g., YouTube subscriber counts) and visualize dynamic fluctuations in their favorite creator's subscriber numbers.
 
-### Signal Manipulation
+### Signal Manipulation 🔧
 
 The application provides a variety of tools for manipulating signals via a user-friendly interface:
 
@@ -27,12 +27,12 @@ The application provides a variety of tools for manipulating signals via a user-
 - **Playback Controls**: Pause, play, or rewind signals at your convenience.
 - **Graph Movement**: Move signals between different graphs seamlessly.
 
-### Signal Gluing
+### Signal Gluing 🔗
 
 - **Cut and Glue**: Users can select specific segments of signals from the rectangular graphs and combine them into a third graph.
 - **Customizable Glue Parameters**: Fine-tune the glue operation with options such as window start, size, signal gap/overlap, and interpolation order.
 
-### Exporting and Reporting
+### Exporting and Reporting 📑
 
 - **Report Generation**: After performing glue operations, users can generate detailed reports that include snapshots of the glued signal graph and data statistics.
 - **PDF Export**: Reports are generated in PDF format with a structured layout, including tables for data statistics.
@@ -47,6 +47,8 @@ The application distinguishes between two types of signal display modes:
 ---
 
 This project provides a comprehensive and intuitive toolset for viewing, manipulating, and analyzing various biosignals, designed with both medical professionals and researchers in mind. It ensures a seamless user experience, whether handling real-time signals or conducting detailed signal analysis.
+---
+
 
 
 ## System Requirements ⚙️
@@ -56,6 +58,11 @@ This project provides a comprehensive and intuitive toolset for viewing, manipul
   - `numpy`
   - `matplotlib`
   - `PyQt5`
+  - `pyqtgraph`
+  - `pandas`
+  - `scipy`
+  - `unofficial-livecounts-api`
+  - `FPDF`
 
 ---
 
