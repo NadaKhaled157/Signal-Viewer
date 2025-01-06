@@ -70,7 +70,7 @@ The application distinguishes between two types of signal display modes:
 1. Clone this repository:
    ```bash
    git clone https://github.com/NadaKhaled157/Signal-Viewer.git
-   cd 2D-Beamforming-Simulator
+   
    ```
 
 2. Install the required dependencies:
@@ -80,7 +80,7 @@ The application distinguishes between two types of signal display modes:
 
 3. Run the simulator:
    ```bash
-   python main.py
+   python MainWindow.py
    ```
 
 ---
