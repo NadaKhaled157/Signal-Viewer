@@ -96,7 +96,7 @@ This project was supervised by Dr. Tamer Basha & Eng. Omar, who provided invalua
   <table style="border-collapse: collapse; border: none;">
     <tr>
       <td align="center" style="border: none;">
-        <img src="https://github.com/user-attachments/assets/e8713727-6257-4c16-b9bd-8f6cb509cf1c" alt="Enjy Ashraf" width="150" height="150"><br>
+        <img src="https://github.com/user-attachments/assets/b8b8ea9d-ccb6-4ad0-b900-8e48ef2113a8" alt="Enjy Ashraf" width="150" height="150"><br>
         <a href="https://github.com/enjyashraf18"><b>Enjy Ashraf</b></a>
       </td>
       <td align="center" style="border: none;">
