@@ -12,10 +12,6 @@ This project is a multi-port, multi-channel signal viewer developed using Python
 - **Polar Graphs**: A non-rectangular graph is available for displaying signals in polar view.
 - **Cine Mode**: All signals are displayed in cine mode, enabling users to view signals running through time.
 
-### Live Signal Monitoring 📡
-
-- Users can connect to real-time websites (e.g., YouTube subscriber counts) and visualize dynamic fluctuations in their favorite creator's subscriber numbers.
-
 ### Signal Manipulation 🔧
 
 The application provides a variety of tools for manipulating signals via a user-friendly interface:
@@ -26,7 +22,9 @@ The application provides a variety of tools for manipulating signals via a user-
 - **Zooming and Scrolling**: Zoom in/out and pan through the signals for detailed analysis.
 - **Playback Controls**: Pause, play, or rewind signals at your convenience.
 - **Graph Movement**: Move signals between different graphs seamlessly.
-
+https://github.com/user-attachments/assets/00ea744b-635a-45f2-95c5-3ab777212801
+### Signal Linking 
+- Ensure that both graphs are synchronized, maintaining linked behavior across all manipulations.
 https://github.com/user-attachments/assets/b1f6b817-f26d-4de9-9a92-8776109b99fe 
 
 ### Signal Gluing 🔗
@@ -51,6 +49,9 @@ The application distinguishes between two types of signal display modes:
 2. **Polar View**: A specialized non-rectangular graph is used to visualize signals in polar coordinates, which is helpful for certain types of biosignal analysis.
 
 https://github.com/user-attachments/assets/074b28ec-2d54-4fb9-bff5-58b80fce8743 
+### Live Signal Monitoring 📡
+
+- Users can connect to real-time websites (e.g., YouTube subscriber counts) and visualize dynamic fluctuations in their favorite creator's subscriber numbers.
 
 ---
 
