@@ -27,15 +27,21 @@ The application provides a variety of tools for manipulating signals via a user-
 - **Playback Controls**: Pause, play, or rewind signals at your convenience.
 - **Graph Movement**: Move signals between different graphs seamlessly.
 
+https://github.com/user-attachments/assets/b1f6b817-f26d-4de9-9a92-8776109b99fe 
+
 ### Signal Gluing 🔗
 
 - **Cut and Glue**: Users can select specific segments of signals from the rectangular graphs and combine them into a third graph.
 - **Customizable Glue Parameters**: Fine-tune the glue operation with options such as window start, size, signal gap/overlap, and interpolation order.
 
+https://github.com/user-attachments/assets/694763d4-208c-464d-867f-b404b35ef1dd 
+
 ### Exporting and Reporting 📑
 
 - **Report Generation**: After performing glue operations, users can generate detailed reports that include snapshots of the glued signal graph and data statistics.
 - **PDF Export**: Reports are generated in PDF format with a structured layout, including tables for data statistics.
+
+https://github.com/user-attachments/assets/6d6e9d4b-bcb3-4009-bec5-ab0406fe1aa8  
 
 ### Polar and Rectangular Views
 
@@ -43,6 +49,8 @@ The application distinguishes between two types of signal display modes:
 
 1. **Rectangular View**: Signals are displayed using traditional rectangular graphs, ideal for standard time-domain signals.
 2. **Polar View**: A specialized non-rectangular graph is used to visualize signals in polar coordinates, which is helpful for certain types of biosignal analysis.
+
+https://github.com/user-attachments/assets/074b28ec-2d54-4fb9-bff5-58b80fce8743 
 
 ---
 
