@@ -55,6 +55,8 @@ https://github.com/user-attachments/assets/074b28ec-2d54-4fb9-bff5-58b80fce8743
 ### Live Signal Monitoring 📡
 
 - Users can connect to real-time websites (e.g., YouTube subscriber counts) and visualize dynamic fluctuations in their favorite creator's subscriber numbers.
+  
+https://github.com/user-attachments/assets/f11d0315-6128-4fd5-850c-8c54ad1a8ddb
 
 ---
 
