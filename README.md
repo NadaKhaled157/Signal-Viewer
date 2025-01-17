@@ -23,7 +23,7 @@ The application provides a variety of tools for manipulating signals via a user-
 - **Playback Controls**: Pause, play, or rewind signals at your convenience.
 - **Graph Movement**: Move signals between different graphs seamlessly.
   
-https://github.com/user-attachments/assets/00ea744b-635a-45f2-95c5-3ab777212801
+https://github.com/user-attachments/assets/4e20b3ae-1b2a-41cd-bdaf-78420b273c2c
 
 ### Signal Linking 
 - Ensure that both graphs are synchronized, maintaining linked behavior across all manipulations.
